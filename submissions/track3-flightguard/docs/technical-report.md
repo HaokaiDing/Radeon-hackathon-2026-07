@@ -8,6 +8,16 @@
 - **Execution scope:** Genesis simulation on one AMD Radeon GPU through PyTorch ROCm
 - **Evidence scope:** simulation-only; single T265 development event; causal only relative to a ROS bag record-time availability proxy
 
+## Team member and contribution
+
+- **Haokai Ding** — system design, implementation, experiments, evaluation, demo, and report.
+
+## Datasets and evaluation inputs
+
+FlightGuard uses no learned training dataset in this submission. Evaluation inputs are procedural Genesis flight contexts plus frozen, checkpoint-specific sensor-error and fault banks. A single T265 availability-pattern development event informed only the record-time availability schedule used by the paired simulation protocol. It is not a population dataset, physical-flight evaluation set, or basis for a sim-to-real claim.
+
+The submitted evaluator reads the frozen JSON evidence under submission/evidence/. Those files bind the simulated contexts, registered banks, audit outcomes, and one-Radeon scaling run; they do not expand the claim boundary beyond simulation-only evidence.
+
 ## Project overview
 
 Embodied-AI demos often report the best downstream score while hiding whether a proposed mechanism is identifiable, stable, or even different from its fallback. FlightGuard packages the opposite behavior: frozen inputs, matched simulation histories, device-native recurrence checks, preregistered scientific gates, exact fallback, and an auditable stop decision.

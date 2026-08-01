@@ -1,14 +1,30 @@
-# AMD Track 3 submission links
-
-- [3:30 workflow video (MP4)](https://radeon-global.anruicloud.com/instances/u-13930-c5fc8044/files/flightguard-amd-v6-observer-dev-remote-v1/submission/flightguard-faultfork-demo.mp4) — SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`
-- [Complete reproducibility bundle (tar.gz)](https://radeon-global.anruicloud.com/instances/u-13930-c5fc8044/files/flightguard-submission-packages/flightguard-amd-track3-submission-20260801T165210849001Z/flightguard-amd-track3-submission-20260801T165210849001Z.tar.gz) — SHA-256 `fb3d978bf30c85f1c3d8fc76cfe739c12173711f1d186c521f84acd94f82ec31`
-- [Interactive evidence demo](https://radeon-global.anruicloud.com/instances/u-13930-c5fc8044/files/flightguard-amd-v6-observer-dev-remote-v1/demo/faultfork/index.html)
-
-The source, technical report, frozen evidence, deterministic figures, and demo code are included below in this submission directory. All results are simulation-only.
-
----
-
 # FlightGuard — Radeon-native fail-closed embodied-flight claim auditor
+
+## 90-second Judge Path
+
+From the repository root, run the evidence-only smoke check (Python standard library only; no GPU, simulator, training, or network access):
+
+~~~bash
+python3 scripts/judge_smoke.py
+~~~
+
+Expected result:
+
+~~~text
+FlightGuard judge smoke: PASS
+frozen evidence 6/6 | claim checks PASS | demo files 4/4
+v4 scientific FAIL | v5 incremental claim rejected | v6 observer rejected with 12/12 exact-Cal fallback | Radeon scaling PASS
+~~~
+
+This is the shortest review path through the submitted result:
+
+1. **Baseline pipeline integrity PASS:** frozen evidence hashes, registered capture completion, v6 audit binding, and the fixed-workload Radeon result are internally consistent.
+2. **v4 rejection:** CausalIMUPatch reached 11/36 fault successes but missed its preregistered failure-reduction gate and trailed Raw/Cal.
+3. **v5 rejection of incremental capability:** Patch tied Cal at 10/12 fault successes and was operationally raw-bit identical after onset; it remains award-ineligible.
+4. **v6 rejection with exact fallback:** 0/12 lanes passed observability qualification; every rejected lane returned the calibrated state by exact identity.
+5. **Radeon scaling PASS:** the separate fixed r5 nominal workload processed 2,227,200 measured transitions and reached 16.027013647337444× speedup from 32 to 512 environments.
+
+The smoke check verifies evidence already committed under submission/evidence/; it does not rerun the scientific campaigns. Continue with the [technical report](docs/technical-report.md), deterministic figures in submission/figures/, or the static demo command below.
 
 FlightGuard is a **simulation-only** embodied-flight evidence pipeline for AMD Track 3. It does not present another estimator as a winner. It turns a candidate flight claim into a sequence of frozen inputs, Radeon-native replays, preregistered gates, and machine-readable accept/reject evidence. When a mechanism cannot beat its calibrated fallback, the pipeline records the failure and stops expansion.
 
@@ -61,7 +77,7 @@ checkpoint gate ──► continue OR stop and preserve the negative result
 The packaged evidence is byte-for-byte copied from the frozen run summaries. The figure builder uses only the Python standard library and rejects unknown input hashes.
 
 ```bash
-/opt/venv/bin/python3.12 scripts/build_award_figures.py \
+python3 scripts/build_award_figures.py \
   --v4 submission/evidence/v4-summary.json \
   --v5 submission/evidence/v5-summary.json \
   --v6 submission/evidence/v6-checkpoint-30.json \
@@ -72,7 +88,7 @@ The packaged evidence is byte-for-byte copied from the frozen run summaries. The
 For the interactive static demo:
 
 ```bash
-/opt/venv/bin/python3.12 -m http.server 8000 --directory demo/faultfork
+python3 -m http.server 8000 --directory demo/faultfork
 ```
 
 Open `http://127.0.0.1:8000`. The flight motion is schematic. The archived fault-stratum explorer is explicitly non-claim evidence; it cannot alter the frozen v4/v5/v6 matrix or exported certificate.
