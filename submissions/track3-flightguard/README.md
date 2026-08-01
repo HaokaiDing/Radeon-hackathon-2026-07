@@ -2,10 +2,10 @@
 
 ## 90-second Judge Path
 
-From the repository root, run the evidence-only smoke check (Python standard library only; no GPU, simulator, training, or network access):
+From the competition repository root, enter the FlightGuard submission and run the evidence-only smoke check (Python standard library only; no GPU, simulator, training, or network access):
 
 ~~~bash
-python3 scripts/judge_smoke.py
+cd submissions/track3-flightguard && python3 scripts/judge_smoke.py
 ~~~
 
 Expected result:
