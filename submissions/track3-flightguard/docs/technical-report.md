@@ -101,6 +101,10 @@ The frozen one-Radeon run achieved the following mean throughput:
 
 The 512/32 speedup was 16.027013647337444× and parallel efficiency was 1.0016883529585903. GPU use reached 86%; maximum observed VRAM was 962,785,280 bytes. The preregistered throughput acceptance was achieved. These numbers describe only the simulation workload and one Radeon, not candidate-mechanism superiority.
 
+## Upstream contribution
+
+A separate software-only contribution is available as [Genesis draft PR #3159](https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159) at commit `09b3e04132a15d6c842835829e277c9cbff4cce3`. Its scope is the AMD Docker alignment from PyTorch 2.6 to AMD's official PyTorch 2.8 image plus a static regression test. The PR remains open, draft, and unmerged. The 9.4 GB image was not pulled or built; no container runtime success, acceptance, or merge is claimed. This software contribution is not counted as robot capability and does not change the v4/v5/v6 scientific verdicts.
+
 ## Reproducibility and evidence
 
 The submission evidence directory contains byte-identical copies of the frozen summaries:
@@ -126,7 +130,7 @@ The submission evidence directory contains byte-identical copies of the frozen s
 - One T265 development event; no population-generalization claim.
 - Causal only relative to ROS bag record-time availability, not global causality.
 - No sim-to-real, real-flight repair, safety, certification, or formal-superiority claim.
-- No upstream contribution claim.
+- The open, draft, unmerged upstream PR is software-only evidence; it is not robot capability and does not alter the v4/v5/v6 scientific verdicts.
 - Radeon scaling is limited to the fixed r5 nominal deployed pipeline on one GPU; it is not estimator or repair superiority.
 - The primary MP4 is a silent simulation workflow rendering. Its Genesis segment is visual-only and metric-ineligible; it supports no fault-recovery, sim-to-real, safety, real-flight, or upstream claim.
 

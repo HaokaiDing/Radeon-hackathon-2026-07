@@ -133,6 +133,10 @@ Generated evidence views are in `submission/figures/`:
 - `summary.csv`
 - `summary.json`
 
+## Upstream contribution
+
+[Genesis draft PR #3159](https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159) is a separate, software-only upstream contribution at commit `09b3e04132a15d6c842835829e277c9cbff4cce3`. Its scope is limited to aligning the AMD Docker default from PyTorch 2.6 to AMD's official PyTorch 2.8 image and adding a static regression test. The PR is open, draft, and unmerged, and it is not counted as robot-capability evidence. The 9.4 GB image was not pulled or built, so this submission makes no claim of container runtime success, acceptance, or merge.
+
 ## Claim boundary and limitations
 
 - Simulation-only; no physical flight validation.
@@ -141,7 +145,7 @@ Generated evidence views are in `submission/figures/`:
 - No sim-to-real, safety, certification, real-flight repair, population-generalization, or formal-superiority claim.
 - v5 cannot support an incremental mechanism claim because Patch and Cal are operationally raw-bit exact after onset.
 - v6 cannot support an observer claim because checkpoint 30 admitted no lanes; checkpoints 31 and 32 were intentionally not audited.
-- No upstream contribution is claimed.
+- The upstream PR is open, draft, and unmerged; it is software-only evidence and does not alter any v4/v5/v6 scientific verdict or support a robot-capability claim.
 - The throughput result applies only to the fixed r5 nominal deployed simulation pipeline on one Radeon; it does not repair or override the v4/v5/v6 mechanism verdicts.
 - `submission/flightguard-genesis-workflow-demo.mp4` is the primary 210-second reviewer video. Its embedded Genesis segment is a simulation-only, visual-only, metric-ineligible nominal replay; it carries no fault-recovery, safety, sim-to-real, real-flight, or upstream claim.
 - `submission/flightguard-faultfork-demo.mp4` remains a retained captioned evidence rendering, not physical-flight footage. It is 1280×720, 10 fps, 2,100 frames, 210.0 seconds, codec request `mp4v` / reported `FMP4`, no audio, 19,375,892 bytes, SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`.
