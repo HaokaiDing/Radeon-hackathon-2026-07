@@ -101,6 +101,10 @@ The frozen one-Radeon run achieved the following mean throughput:
 
 The 512/32 speedup was 16.027013647337444× and parallel efficiency was 1.0016883529585903. GPU use reached 86%; maximum observed VRAM was 962,785,280 bytes. The preregistered throughput acceptance was achieved. These numbers describe only the simulation workload and one Radeon, not candidate-mechanism superiority.
 
+### Frozen four-case synthetic claim audit
+
+A generic eq/ge/le constraint evaluator read the four frozen artifact bytes, verified their SHA-256 bindings, and decided all cases before consulting expected labels. It produced 1 ACCEPT and 3 REJECT with TP=1, TN=3, FP=0, FN=0, accuracy 1.0, false-accept count 0, and maximum decision latency 37.38 µs. This is a frozen four-case synthetic corpus result only—not robot capability, safety, or general classifier accuracy. Evaluator SHA-256: `33c58e5ecf3c861ff931421c488fbdbb3293f47cbb9edd7164d27f025931abe9`; result SHA-256: `ccbf38ef7aa36571c3f2433d5f4e9d54b1dd1de7cc2e8f93f2291ccc816f83f7`.
+
 ## Upstream contribution
 
 A separate software-only contribution is available as [Genesis draft PR #3159](https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159) at commit `09b3e04132a15d6c842835829e277c9cbff4cce3`. Its scope is the AMD Docker alignment from PyTorch 2.6 to AMD's official PyTorch 2.8 image plus a static regression test. The PR remains open, draft, and unmerged. The 9.4 GB image was not pulled or built; no container runtime success, acceptance, or merge is claimed. This software contribution is not counted as robot capability and does not change the v4/v5/v6 scientific verdicts.
@@ -117,6 +121,9 @@ The submission evidence directory contains byte-identical copies of the frozen s
 | `submission/evidence/v6-audit-receipt.json` | `521738135a3dcc28dc42ecd8b4f01fe5abe925b8353a45577d0b8b5de9e3e8c1` |
 | `submission/evidence/capture-terminal.json` | `923c24124f9af6d53d82a80c9efd72d8e5ada962a4ceb30adf48e232c2c341be` |
 | `submission/evidence/radeon-formal-scaling.json` | `98d9b331907f9968ae65054c6f9d840dc0440eb9209c14e955dc628df736f072` |
+| `scripts/evaluate_frozen_claim_constraints.py` | `33c58e5ecf3c861ff931421c488fbdbb3293f47cbb9edd7164d27f025931abe9` |
+| `tests/test_evaluate_frozen_claim_constraints.py` | `73160247493eb0ce5148c3c5d313f7798d6d08ee1b9bd4ea9504743536d9e49e` |
+| `submission/evidence/frozen-claim-auditor-benchmark.json` | `ccbf38ef7aa36571c3f2433d5f4e9d54b1dd1de7cc2e8f93f2291ccc816f83f7` |
 
 `scripts/build_award_figures.py` verifies the v4/v5/v6/scaling hashes, derives every plotted value from those JSON payloads, and writes deterministic SVG, CSV, and JSON outputs. The static demo foregrounds the three-case gate matrix and the separate Radeon throughput evidence; its animation and archived fault map remain explicitly illustrative.
 
@@ -132,6 +139,7 @@ The submission evidence directory contains byte-identical copies of the frozen s
 - No sim-to-real, real-flight repair, safety, certification, or formal-superiority claim.
 - The open, draft, unmerged upstream PR is software-only evidence; it is not robot capability and does not alter the v4/v5/v6 scientific verdicts.
 - Radeon scaling is limited to the fixed r5 nominal deployed pipeline on one GPU; it is not estimator or repair superiority.
+- Frozen-auditor accuracy 1.0 applies only to four immutable synthetic cases; it is not evidence of general accuracy, robot capability, or safety.
 - The primary MP4 is a silent simulation workflow rendering. Its Genesis segment is visual-only and metric-ineligible; it supports no fault-recovery, sim-to-real, safety, real-flight, or upstream claim.
 
 The negative v6 result is a result: under the frozen gate, the observer did not earn deployment beyond the calibrated baseline.

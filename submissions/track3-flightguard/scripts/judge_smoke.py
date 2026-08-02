@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evidence-only 90-second judge path for the FlightGuard submission."""
+"""Evidence-only 60-second judge path for the FlightGuard submission."""
 from __future__ import annotations
 import hashlib
 import json
@@ -21,7 +21,12 @@ EXPECTED_SHA256 = {
     "v6-audit-receipt.json": "521738135a3dcc28dc42ecd8b4f01fe5abe925b8353a45577d0b8b5de9e3e8c1",
     "capture-terminal.json": "923c24124f9af6d53d82a80c9efd72d8e5ada962a4ceb30adf48e232c2c341be",
     "radeon-formal-scaling.json": "98d9b331907f9968ae65054c6f9d840dc0440eb9209c14e955dc628df736f072",
+    "frozen-claim-auditor-benchmark.json": "ccbf38ef7aa36571c3f2433d5f4e9d54b1dd1de7cc2e8f93f2291ccc816f83f7",
 }
+AUDITOR_FILES = (
+    ("scripts/evaluate_frozen_claim_constraints.py", "33c58e5ecf3c861ff931421c488fbdbb3293f47cbb9edd7164d27f025931abe9", 16_259),
+    ("tests/test_evaluate_frozen_claim_constraints.py", "73160247493eb0ce5148c3c5d313f7798d6d08ee1b9bd4ea9504743536d9e49e", 8_958),
+)
 DEMO_FILES = ("demo/faultfork/index.html", "demo/faultfork/app.js", "demo/faultfork/styles.css", "submission/flightguard-faultfork-demo.mp4")
 WORKFLOW_ASSETS = (
     ("submission/flightguard-genesis-workflow-demo.mp4", "37924b5e3ef81a122c2ef5a76edb40ed9db0fd38aba2dbb08fb153b8b1fb0ba0", 18_873_354, (2_100, 1_280, 720, 10.0)),
@@ -119,6 +124,81 @@ def main() -> int:
         check_equal(errors, "scaling parallel efficiency", summaries[-1]["parallel_efficiency_vs_32_envs"], 1.0016883529585903)
         check_equal(errors, "scaling acceptance", scaling["scaling"]["performance_acceptance"].get("achieved"), True)
 
+        auditor = documents["frozen-claim-auditor-benchmark.json"]
+        check_equal(errors, "auditor schema", auditor.get("schema_version"), "flightguard-frozen-claim-auditor-benchmark-v1")
+        check_equal(errors, "auditor status", auditor.get("status"), "PASS")
+        check_equal(
+            errors,
+            "auditor source binding",
+            auditor.get("source", {}).get("sha256"),
+            AUDITOR_FILES[0][1],
+        )
+        check_equal(
+            errors,
+            "auditor scope",
+            auditor.get("scope"),
+            {
+                "name": "frozen 4-case synthetic corpus",
+                "case_count": 4,
+                "simulation_only": True,
+                "robot_capability_claim": False,
+                "safety_claim": False,
+                "general_accuracy_claim": False,
+            },
+        )
+        expected_cases = [
+            ("radeon_fixed_r5_scaling", "ACCEPT", "ACCEPT", True, EXPECTED_SHA256["radeon-formal-scaling.json"]),
+            ("v4_repair_claim", "REJECT", "REJECT", True, EXPECTED_SHA256["v4-summary.json"]),
+            ("v5_incremental_capability_claim", "REJECT", "REJECT", True, EXPECTED_SHA256["v5-summary.json"]),
+            ("v6_observer_admission_claim", "REJECT", "REJECT", True, EXPECTED_SHA256["v6-checkpoint-30.json"]),
+        ]
+        actual_cases = [
+            (
+                case.get("case_id"),
+                case.get("decision"),
+                case.get("expected_label"),
+                case.get("correct"),
+                case.get("artifact", {}).get("sha256"),
+            )
+            for case in auditor.get("cases", [])
+        ]
+        check_equal(errors, "auditor cases/labels/artifact bindings", actual_cases, expected_cases)
+        check_equal(
+            errors,
+            "auditor confusion",
+            auditor.get("confusion"),
+            {
+                "true_positive": 1,
+                "true_negative": 3,
+                "false_positive": 0,
+                "false_negative": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "specificity": 1.0,
+                "accuracy": 1.0,
+                "false_accept_count": 0,
+                "false_accept_rate": 0.0,
+            },
+        )
+        check_equal(
+            errors,
+            "auditor maximum decision latency ns",
+            auditor.get("decision_latency_ns", {}).get("maximum"),
+            37_380,
+        )
+
+    verified_auditor_files = 0
+    for relative, expected_sha, expected_size in AUDITOR_FILES:
+        path = ROOT / relative
+        if not path.is_file():
+            errors.append(f"missing auditor file: {relative}")
+            continue
+        error_count = len(errors)
+        check_equal(errors, f"auditor file size {relative}", path.stat().st_size, expected_size)
+        check_equal(errors, f"auditor file SHA {relative}", sha256(path), expected_sha)
+        if len(errors) == error_count:
+            verified_auditor_files += 1
+
     present_demo = 0
     for relative in DEMO_FILES:
         path = ROOT / relative
@@ -167,9 +247,12 @@ def main() -> int:
             print(f"- {error}")
         return 1
     print("FlightGuard judge smoke: PASS")
-    print(f"frozen evidence 6/6 | claim checks PASS | demo files {present_demo}/4 | workflow assets {verified_workflow}/4")
-    print(f"workflow video {video_frames['submission/flightguard-genesis-workflow-demo.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
-    print("v4 scientific FAIL | v5 incremental claim rejected | v6 observer rejected with 12/12 exact-Cal fallback | Radeon scaling PASS")
+    print(f"frozen evidence 7/7 | claim checks PASS | auditor files {verified_auditor_files}/2 | demo files {present_demo}/4 | workflow assets {verified_workflow}/4")
+    print(f"60-second path 1/5 | Genesis workflow video {video_frames['submission/flightguard-genesis-workflow-demo.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
+    print("60-second path 2/5 | one-Radeon fixed-r5 intra-device scaling 16.027013647337444x")
+    print("60-second path 3/5 | synthetic 4-case auditor: 1 ACCEPT / 3 REJECT | TP=1 TN=3 FP=0 FN=0 | max=37.38 us")
+    print("60-second path 4/5 | Genesis draft PR #3159 is open, draft, unmerged, and software-only")
+    print("60-second path 5/5 | v4 scientific FAIL | v5 incremental claim rejected | v6 observer rejected with 12/12 exact-Cal fallback")
     return 0
 
 if __name__ == "__main__":
