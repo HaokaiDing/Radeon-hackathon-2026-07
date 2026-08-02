@@ -116,7 +116,9 @@ The submission evidence directory contains byte-identical copies of the frozen s
 
 `scripts/build_award_figures.py` verifies the v4/v5/v6/scaling hashes, derives every plotted value from those JSON payloads, and writes deterministic SVG, CSV, and JSON outputs. The static demo foregrounds the three-case gate matrix and the separate Radeon throughput evidence; its animation and archived fault map remain explicitly illustrative.
 
-`scripts/render_submission_video.py` reads the same four frozen JSON files and produced `submission/flightguard-faultfork-demo.mp4`: 1280×720, 10 fps, 2,100 frames, 210.0 seconds, requested codec `mp4v`, reported codec `FMP4`, captioned with no audio, size 19,375,892 bytes, SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`. It is a generated evidence explainer, not real-flight footage.
+`scripts/render_submission_video.py` produced the primary reviewer artifact, `submission/flightguard-genesis-workflow-demo.mp4`: 1280×720, 10 fps, 2,100 frames, 210.0 seconds, reported codec `FMP4`, no audio, size 18,873,354 bytes, SHA-256 `37924b5e3ef81a122c2ef5a76edb40ed9db0fd38aba2dbb08fb153b8b1fb0ba0`. Its 00:30–01:20 interval is a real Genesis truth-controller visual replay sourced from `submission/genesis-nominal-visual-replay.mp4` (fixed seed 5001, one simulation step per frame, terminal step 476, 24 padded frames, 500 frames, SHA-256 `adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce`). The segment is simulation-only, visual-only, and metric-ineligible; it demonstrates nominal simulator motion and the review workflow, not fault recovery.
+
+`submission/flightguard-faultfork-demo.mp4` is retained as the frozen-evidence explainer: 1280×720, 10 fps, 2,100 frames, 210.0 seconds, size 19,375,892 bytes, SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`.
 
 ## Limitations and claim boundary
 
@@ -126,7 +128,7 @@ The submission evidence directory contains byte-identical copies of the frozen s
 - No sim-to-real, real-flight repair, safety, certification, or formal-superiority claim.
 - No upstream contribution claim.
 - Radeon scaling is limited to the fixed r5 nominal deployed pipeline on one GPU; it is not estimator or repair superiority.
-- The MP4 is a captioned simulation-evidence rendering with no audio, not a real-flight recording.
+- The primary MP4 is a silent simulation workflow rendering. Its Genesis segment is visual-only and metric-ineligible; it supports no fault-recovery, sim-to-real, safety, real-flight, or upstream claim.
 
 The negative v6 result is a result: under the frozen gate, the observer did not earn deployment beyond the calibrated baseline.
 

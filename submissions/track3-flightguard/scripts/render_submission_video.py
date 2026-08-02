@@ -18,6 +18,14 @@ HEIGHT = 720
 DEFAULT_FPS = 10.0
 DEFAULT_DURATION = 210.0
 FOURCC = "mp4v"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+GENESIS_CLIP_PATH = PROJECT_ROOT / "submission/genesis-nominal-visual-replay.mp4"
+GENESIS_CLIP_SHA256 = "adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce"
+GENESIS_CLIP_FRAME_COUNT = 500
+GENESIS_CLIP_START_FRAME = 300
+GENESIS_CLIP_END_FRAME = GENESIS_CLIP_START_FRAME + GENESIS_CLIP_FRAME_COUNT
+GENESIS_CLIP_FPS = 10.0
+DEFAULT_OUTPUT = PROJECT_ROOT / "submission/flightguard-genesis-workflow-demo.mp4"
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 EXPECTED_SHA256 = {
@@ -58,6 +66,35 @@ def load_verified(role: str, path: Path) -> dict[str, Any]:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def open_verified_genesis_clip() -> cv2.VideoCapture:
+    digest = hashlib.sha256()
+    with GENESIS_CLIP_PATH.open("rb") as handle:
+        while chunk := handle.read(1024 * 1024):
+            digest.update(chunk)
+    actual_sha256 = digest.hexdigest()
+    require(
+        actual_sha256 == GENESIS_CLIP_SHA256,
+        "Genesis clip SHA-256 mismatch: "
+        f"expected {GENESIS_CLIP_SHA256}, got {actual_sha256}",
+    )
+
+    capture = cv2.VideoCapture(str(GENESIS_CLIP_PATH))
+    if not capture.isOpened():
+        raise RuntimeError(f"Genesis clip cannot be opened: {GENESIS_CLIP_PATH}")
+    try:
+        frame_count = int(round(capture.get(cv2.CAP_PROP_FRAME_COUNT)))
+        width = int(round(capture.get(cv2.CAP_PROP_FRAME_WIDTH)))
+        height = int(round(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        fps = float(capture.get(cv2.CAP_PROP_FPS))
+        require(frame_count == GENESIS_CLIP_FRAME_COUNT, "Genesis clip frame count mismatch")
+        require(width == WIDTH and height == HEIGHT, "Genesis clip dimensions mismatch")
+        require(abs(fps - GENESIS_CLIP_FPS) < 0.01, "Genesis clip fps mismatch")
+    except Exception:
+        capture.release()
+        raise
+    return capture
 
 
 def evidence_values(
@@ -373,6 +410,8 @@ def render_video(values: dict[str, Any], output: Path, fps: float, duration: flo
     part = output.with_name(f".{output.name}.part.mp4")
     if part.exists():
         raise FileExistsError(f"refusing to overwrite {part}")
+    frame_count = int(round(duration * fps))
+    require(frame_count == 2100, "workflow demo requires exactly 2100 output frames")
 
     segments: list[tuple[float, float, Callable[[dict[str, Any]], np.ndarray], str]] = [
         (0.0, 18.0, draw_title, "FlightGuard audits embodied-flight claims on Radeon and preserves negative evidence."),
@@ -385,27 +424,48 @@ def render_video(values: dict[str, Any], output: Path, fps: float, duration: flo
     ]
     require(abs(segments[-1][1] - duration) < 1e-9, "segment duration mismatch")
     slides = [builder(values) for _, _, builder, _ in segments]
+    genesis_capture = open_verified_genesis_clip()
     writer = cv2.VideoWriter(str(part), cv2.VideoWriter_fourcc(*FOURCC), fps, (WIDTH, HEIGHT))
     if not writer.isOpened():
+        genesis_capture.release()
         raise RuntimeError("cv2 VideoWriter failed to open mp4v output")
-    frame_count = int(round(duration * fps))
     try:
         for frame_index in range(frame_count):
-            elapsed = frame_index / fps
-            segment_index = next(
-                index
-                for index, (start, end, _builder, _caption) in enumerate(segments)
-                if start <= elapsed < end
-            )
-            start, end, _builder, caption = segments[segment_index]
-            local = (elapsed - start) / max(end - start, 1e-9)
-            frame = add_caption(slides[segment_index], caption, elapsed, duration, local)
-            fade = min(1.0, local / 0.04, (1.0 - local) / 0.04)
-            if fade < 1.0:
-                frame = cv2.addWeighted(frame, max(0.0, fade), np.zeros_like(frame), 1.0 - max(0.0, fade), 0.0)
+            if GENESIS_CLIP_START_FRAME <= frame_index < GENESIS_CLIP_END_FRAME:
+                clip_index = frame_index - GENESIS_CLIP_START_FRAME
+                ok, frame = genesis_capture.read()
+                if not ok:
+                    raise RuntimeError(f"Genesis clip early EOF at frame {clip_index}")
+                require(
+                    frame.shape == (HEIGHT, WIDTH, 3) and frame.dtype == np.uint8,
+                    f"Genesis clip frame {clip_index} shape or dtype mismatch",
+                )
+            else:
+                elapsed = frame_index / fps
+                segment_index = next(
+                    index
+                    for index, (start, end, _builder, _caption) in enumerate(segments)
+                    if start <= elapsed < end
+                )
+                start, end, _builder, caption = segments[segment_index]
+                local = (elapsed - start) / max(end - start, 1e-9)
+                frame = add_caption(slides[segment_index], caption, elapsed, duration, local)
+                fade = min(1.0, local / 0.04, (1.0 - local) / 0.04)
+                if fade < 1.0:
+                    frame = cv2.addWeighted(
+                        frame,
+                        max(0.0, fade),
+                        np.zeros_like(frame),
+                        1.0 - max(0.0, fade),
+                        0.0,
+                    )
             writer.write(frame)
+        extra_ok, _extra_frame = genesis_capture.read()
+        if extra_ok:
+            raise RuntimeError("Genesis clip has frames beyond frame 499")
     finally:
         writer.release()
+        genesis_capture.release()
 
     capture = cv2.VideoCapture(str(part))
     if not capture.isOpened():
@@ -446,10 +506,12 @@ def main() -> int:
     parser.add_argument("--v5", required=True, type=Path)
     parser.add_argument("--v6", required=True, type=Path)
     parser.add_argument("--scaling", required=True, type=Path)
-    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--fps", type=float, default=DEFAULT_FPS)
     parser.add_argument("--duration", type=float, default=DEFAULT_DURATION)
     args = parser.parse_args()
+    if args.output.resolve() != DEFAULT_OUTPUT.resolve():
+        raise ValueError(f"--output is fixed to {DEFAULT_OUTPUT}")
 
     values = evidence_values(
         load_verified("v4", args.v4),

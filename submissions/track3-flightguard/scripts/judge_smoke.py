@@ -7,6 +7,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "submission" / "evidence"
 EXPECTED_SHA256 = {
@@ -18,6 +23,12 @@ EXPECTED_SHA256 = {
     "radeon-formal-scaling.json": "98d9b331907f9968ae65054c6f9d840dc0440eb9209c14e955dc628df736f072",
 }
 DEMO_FILES = ("demo/faultfork/index.html", "demo/faultfork/app.js", "demo/faultfork/styles.css", "submission/flightguard-faultfork-demo.mp4")
+WORKFLOW_ASSETS = (
+    ("submission/flightguard-genesis-workflow-demo.mp4", "37924b5e3ef81a122c2ef5a76edb40ed9db0fd38aba2dbb08fb153b8b1fb0ba0", 18_873_354, (2_100, 1_280, 720, 10.0)),
+    ("submission/genesis-nominal-visual-replay.mp4", "adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce", 3_717_464, (500, 1_280, 720, 10.0)),
+    ("scripts/render_submission_video.py", "1facba35683e7e3136b66ccab20dcfe83c173e821eab5e1950c397835b9ac7f4", 25_819, None),
+    ("scripts/render_genesis_submission_clips_amd.py", "e48a670525cce608e4d158bcbc2e9c7727a724471f75b6646adee20b63509e91", 19_879, None),
+)
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -115,13 +126,49 @@ def main() -> int:
             present_demo += 1
         else:
             errors.append(f"missing or empty demo file: {relative}")
+
+    verified_workflow = 0
+    video_frames: dict[str, int] = {}
+    for relative, expected_sha, expected_size, expected_video in WORKFLOW_ASSETS:
+        error_count = len(errors)
+        path = ROOT / relative
+        if not path.is_file():
+            errors.append(f"missing workflow asset: {relative}")
+            continue
+        check_equal(errors, f"workflow asset size {relative}", path.stat().st_size, expected_size)
+        check_equal(errors, f"workflow asset SHA {relative}", sha256(path), expected_sha)
+        if expected_video is not None:
+            if cv2 is None:
+                errors.append(f"OpenCV unavailable for video metadata: {relative}")
+            else:
+                capture = cv2.VideoCapture(str(path))
+                try:
+                    if not capture.isOpened():
+                        errors.append(f"cannot open workflow video: {relative}")
+                    else:
+                        actual_video = (
+                            int(round(capture.get(cv2.CAP_PROP_FRAME_COUNT))),
+                            int(round(capture.get(cv2.CAP_PROP_FRAME_WIDTH))),
+                            int(round(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))),
+                            float(capture.get(cv2.CAP_PROP_FPS)),
+                        )
+                        video_frames[relative] = actual_video[0]
+                        check_equal(errors, f"video frames/size {relative}", actual_video[:3], expected_video[:3])
+                        if abs(actual_video[3] - expected_video[3]) > 1e-6:
+                            errors.append(f"video fps {relative}: expected {expected_video[3]!r}, got {actual_video[3]!r}")
+                finally:
+                    capture.release()
+        if len(errors) == error_count:
+            verified_workflow += 1
+
     if errors:
         print("FlightGuard judge smoke: FAIL")
         for error in errors:
             print(f"- {error}")
         return 1
     print("FlightGuard judge smoke: PASS")
-    print("frozen evidence 6/6 | claim checks PASS | demo files 4/4")
+    print(f"frozen evidence 6/6 | claim checks PASS | demo files {present_demo}/4 | workflow assets {verified_workflow}/4")
+    print(f"workflow video {video_frames['submission/flightguard-genesis-workflow-demo.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
     print("v4 scientific FAIL | v5 incremental claim rejected | v6 observer rejected with 12/12 exact-Cal fallback | Radeon scaling PASS")
     return 0
 

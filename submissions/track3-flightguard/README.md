@@ -2,7 +2,7 @@
 
 ## 90-second Judge Path
 
-From the competition repository root, enter the FlightGuard submission and run the evidence-only smoke check (Python standard library only; no GPU, simulator, training, or network access):
+From the competition repository root, enter the FlightGuard submission and run the evidence-only smoke check (Python standard library plus the project's existing OpenCV runtime; no GPU, simulator, training, or network access):
 
 ~~~bash
 cd submissions/track3-flightguard && python3 scripts/judge_smoke.py
@@ -12,7 +12,8 @@ Expected result:
 
 ~~~text
 FlightGuard judge smoke: PASS
-frozen evidence 6/6 | claim checks PASS | demo files 4/4
+frozen evidence 6/6 | claim checks PASS | demo files 4/4 | workflow assets 4/4
+workflow video 2100/2100 | Genesis clip 500/500
 v4 scientific FAIL | v5 incremental claim rejected | v6 observer rejected with 12/12 exact-Cal fallback | Radeon scaling PASS
 ~~~
 
@@ -25,6 +26,14 @@ This is the shortest review path through the submitted result:
 5. **Radeon scaling PASS:** the separate fixed r5 nominal workload processed 2,227,200 measured transitions and reached 16.027013647337444× speedup from 32 to 512 environments.
 
 The smoke check verifies evidence already committed under submission/evidence/; it does not rerun the scientific campaigns. Continue with the [technical report](docs/technical-report.md), deterministic figures in submission/figures/, or the static demo command below.
+
+## Primary reviewer video
+
+The primary reviewer artifact is `submission/flightguard-genesis-workflow-demo.mp4`: 1280×720, 10 fps, 2,100 frames, 210.0 seconds, reported codec `FMP4`, no audio, 18,873,354 bytes, SHA-256 `37924b5e3ef81a122c2ef5a76edb40ed9db0fd38aba2dbb08fb153b8b1fb0ba0`.
+
+Its 00:30–01:20 interval is a 50-second real Genesis truth-controller visual replay rendered directly from simulator state. The bound source clip is `submission/genesis-nominal-visual-replay.mp4`: fixed seed 5001, one simulation step per frame, terminal step 476, 24 padded frames, 500 total frames, SHA-256 `adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce`. The segment is simulation-only, visual-only, and metric-ineligible. It demonstrates the review workflow and nominal simulated motion; it does not demonstrate fault recovery, physical-flight performance, safety, sim-to-real transfer, or upstream contribution.
+
+`submission/flightguard-faultfork-demo.mp4` remains the retained frozen-evidence explainer. It is no longer the primary reviewer video.
 
 FlightGuard is a **simulation-only** embodied-flight evidence pipeline for AMD Track 3. It does not present another estimator as a winner. It turns a candidate flight claim into a sequence of frozen inputs, Radeon-native replays, preregistered gates, and machine-readable accept/reject evidence. When a mechanism cannot beat its calibrated fallback, the pipeline records the failure and stops expansion.
 
@@ -134,7 +143,8 @@ Generated evidence views are in `submission/figures/`:
 - v6 cannot support an observer claim because checkpoint 30 admitted no lanes; checkpoints 31 and 32 were intentionally not audited.
 - No upstream contribution is claimed.
 - The throughput result applies only to the fixed r5 nominal deployed simulation pipeline on one Radeon; it does not repair or override the v4/v5/v6 mechanism verdicts.
-- `submission/flightguard-faultfork-demo.mp4` is a captioned evidence rendering, not physical-flight footage. It is 1280×720, 10 fps, 2,100 frames, 210.0 seconds, codec request `mp4v` / reported `FMP4`, no audio, 19,375,892 bytes, SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`.
+- `submission/flightguard-genesis-workflow-demo.mp4` is the primary 210-second reviewer video. Its embedded Genesis segment is a simulation-only, visual-only, metric-ineligible nominal replay; it carries no fault-recovery, safety, sim-to-real, real-flight, or upstream claim.
+- `submission/flightguard-faultfork-demo.mp4` remains a retained captioned evidence rendering, not physical-flight footage. It is 1280×720, 10 fps, 2,100 frames, 210.0 seconds, codec request `mp4v` / reported `FMP4`, no audio, 19,375,892 bytes, SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`.
 
 ## Repository map
 
@@ -144,7 +154,9 @@ Generated evidence views are in `submission/figures/`:
 - `demo/faultfork/`: static evidence-first demo with preserved flight animation.
 - `docs/technical-report.md`: compact Track 3 technical report.
 - `submission/video-script.md`: 210-second English narration and screen-action timeline.
-- `submission/flightguard-faultfork-demo.mp4`: verified 210-second captioned render generated from frozen JSON.
+- `submission/flightguard-genesis-workflow-demo.mp4`: primary verified 210-second reviewer video.
+- `submission/genesis-nominal-visual-replay.mp4`: bound 50-second Genesis truth-controller visual replay used at 00:30–01:20.
+- `submission/flightguard-faultfork-demo.mp4`: retained 210-second captioned frozen-evidence explainer.
 - `submission/evidence/`: immutable evidence copies.
 - `submission/figures/`: deterministic figures and machine-readable summaries, including Radeon throughput.
 
