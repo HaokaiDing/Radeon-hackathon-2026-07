@@ -37,13 +37,11 @@ Only the vertical controller gains change (`kp_z`: 2.5→8.0, `kd_z`: 2.0→3.6)
 
 ## Full reviewer video
 
-[`submission/flightguard-nominal-envelope-demo-v2.mp4`](submission/flightguard-nominal-envelope-demo-v2.mp4) is the positive-first 210-second reviewer artifact: 1280×720, 10 fps, 2,100 frames, reported codec `FMP4`, no audio, 17,428,715 bytes, SHA-256 `a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd`.
+[`submission/flightguard-challenge-arena-workflow-demo-v3.mp4`](submission/flightguard-challenge-arena-workflow-demo-v3.mp4) is the primary 210-second reviewer artifact. It opens with the complete 7-second paired Challenge Arena replay, then shows the product workflow, the frozen Radeon/ROCm/Genesis run output, primary and retention results, no-op and kill diagnostics, the isolated `kp_z`/`kd_z` change, one-Radeon scaling, reproduction command, application, and claim boundary. It contains 2,100 English-captioned frames at 1280×720 and 10 fps, reports codec `FMP4`, has no audio track, is 17,874,513 bytes, and has SHA-256 `d72057ff2a1bdf1796240a857f6451f545c070204ec6dcbe551f2dd039e00670`.
 
-[`submission/flightguard-genesis-workflow-demo.mp4`](submission/flightguard-genesis-workflow-demo.mp4) is the companion Genesis workflow recording.
+The deterministic CPU renderer is [`scripts/render_challenge_arena_workflow_video_v3.py`](scripts/render_challenge_arena_workflow_video_v3.py), 32,850 bytes, SHA-256 `ed138fc753771172b8922ce83b6ebf52a1e2010247aadf87fa1e0cfb9883fe84`. Every number is read from the submitted frozen Challenge Arena archive/summary or the frozen Radeon scaling evidence.
 
-Its 00:30–01:20 segment embeds the existing `submission/genesis-nominal-visual-replay.mp4`: fixed seed 5001, truth-controller, nominal simulation visual, 500 frames, SHA-256 `adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce`. The clip is metric-ineligible and is not one of the 384 heldout evidence contexts. Numeric cards are independently derived from the six submitted raw metric JSON files and the aggregate.
-
-The renderer is `scripts/render_submission_video.py`, 26,993 bytes, SHA-256 `a0a17d91e15c92f8541da594c7c2ca04b97ce7c5326f61b08436798caace35cd`.
+[`submission/flightguard-nominal-envelope-demo-v2.mp4`](submission/flightguard-nominal-envelope-demo-v2.mp4) remains available as the historical positive-first reviewer video, and [`submission/flightguard-genesis-workflow-demo.mp4`](submission/flightguard-genesis-workflow-demo.mp4) remains the companion Genesis workflow recording. Their embedded fixed-seed 5001 truth-controller visual is metric-ineligible and is not one of the Challenge Arena evidence contexts.
 
 ## What the project delivers
 
@@ -387,8 +385,9 @@ FlightGuard does not claim:
 - `submission/figures/challenge-arena-terminal.png`: exact terminal frame from the paired replay
 - `submission/flightguard-challenge-arena-v1.mp4`: 7-second paired Genesis capability demo
 - `submission/figures/`: deterministic evidence views
-- `submission/video-script.md`: 210-second English narration and screen plan
-- `submission/flightguard-nominal-envelope-demo-v2.mp4`: primary positive-first 210-second reviewer video
+- `submission/video-script.md`: 210-second English burned-caption and screen plan
+- `submission/flightguard-challenge-arena-workflow-demo-v3.mp4`: primary 210-second Challenge Arena workflow video
+- `submission/flightguard-nominal-envelope-demo-v2.mp4`: historical positive-first reviewer video
 - `submission/genesis-nominal-visual-replay.mp4`: fixed-seed 5001 truth-controller nominal visual, metric-ineligible
 - `submission/evidence/raw-metrics/`: six byte-exact source metric files
 - `demo/faultfork/`: static evidence explorer

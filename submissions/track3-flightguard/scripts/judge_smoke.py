@@ -64,6 +64,12 @@ WORKFLOW_ASSETS = (
         (140, 1_280, 720, 20.0),
     ),
     (
+        "submission/flightguard-challenge-arena-workflow-demo-v3.mp4",
+        "d72057ff2a1bdf1796240a857f6451f545c070204ec6dcbe551f2dd039e00670",
+        17_874_513,
+        (2_100, 1_280, 720, 10.0),
+    ),
+    (
         "submission/flightguard-nominal-envelope-demo-v2.mp4",
         "a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd",
         17_428_715,
@@ -84,10 +90,17 @@ STATIC_FILES = (
     "demo/faultfork/app.js",
     "demo/faultfork/styles.css",
 )
-RENDERER_ASSET = (
-    "scripts/render_submission_video.py",
-    "a0a17d91e15c92f8541da594c7c2ca04b97ce7c5326f61b08436798caace35cd",
-    26_993,
+RENDERER_ASSETS = (
+    (
+        "scripts/render_submission_video.py",
+        "a0a17d91e15c92f8541da594c7c2ca04b97ce7c5326f61b08436798caace35cd",
+        26_993,
+    ),
+    (
+        "scripts/render_challenge_arena_workflow_video_v3.py",
+        "ed138fc753771172b8922ce83b6ebf52a1e2010247aadf87fa1e0cfb9883fe84",
+        32_850,
+    ),
 )
 CHALLENGE_CODE_ASSETS = (
     ("configs/challenge_arena_v1.json", "af30cfdaaecb1b00ec477a2a22b96eeaf25b328327b11a43f04f1e570045173d", 2_989),
@@ -155,6 +168,18 @@ def check_video(
     if abs(actual[3] - expected_meta[3]) > 1e-6:
         errors.append(f"video fps {relative}: expected {expected_meta[3]}, got {actual[3]}")
     return actual[0]
+
+
+def mp4_handler_types(path: Path) -> list[str]:
+    raw = path.read_bytes()
+    handlers: list[str] = []
+    start = 0
+    while True:
+        offset = raw.find(b"hdlr", start)
+        if offset < 0:
+            return handlers
+        handlers.append(raw[offset + 12 : offset + 16].decode("ascii", "replace"))
+        start = offset + 4
 
 
 def main() -> int:
@@ -451,13 +476,13 @@ def main() -> int:
         if not path.is_file() or path.stat().st_size == 0:
             errors.append(f"missing or empty submission file: {relative}")
 
-    renderer_relative, renderer_sha, renderer_size = RENDERER_ASSET
-    renderer_path = ROOT / renderer_relative
-    if not renderer_path.is_file():
-        errors.append(f"missing renderer: {renderer_relative}")
-    else:
-        equal(errors, "renderer size", renderer_path.stat().st_size, renderer_size)
-        equal(errors, "renderer SHA", sha256(renderer_path), renderer_sha)
+    for renderer_relative, renderer_sha, renderer_size in RENDERER_ASSETS:
+        renderer_path = ROOT / renderer_relative
+        if not renderer_path.is_file():
+            errors.append(f"missing renderer: {renderer_relative}")
+        else:
+            equal(errors, f"renderer size {renderer_relative}", renderer_path.stat().st_size, renderer_size)
+            equal(errors, f"renderer SHA {renderer_relative}", sha256(renderer_path), renderer_sha)
 
     for relative, expected_sha, expected_size in CHALLENGE_CODE_ASSETS + CHALLENGE_STATIC_ASSETS:
         path = ROOT / relative
@@ -470,6 +495,19 @@ def main() -> int:
     video_frames: dict[str, int] = {}
     for relative, expected_sha, expected_size, expected_meta in WORKFLOW_ASSETS:
         video_frames[relative] = check_video(errors, relative, expected_sha, expected_size, expected_meta)
+
+    primary_video = ROOT / "submission/flightguard-challenge-arena-workflow-demo-v3.mp4"
+    if primary_video.is_file() and cv2 is not None:
+        capture = cv2.VideoCapture(str(primary_video))
+        try:
+            fourcc_value = int(round(capture.get(cv2.CAP_PROP_FOURCC)))
+        finally:
+            capture.release()
+        codec = "".join(chr((fourcc_value >> (8 * index)) & 0xFF) for index in range(4))
+        equal(errors, "primary reviewer video codec", codec, "FMP4")
+        handlers = mp4_handler_types(primary_video)
+        equal(errors, "primary reviewer video video-track count", handlers.count("vide"), 1)
+        equal(errors, "primary reviewer video audio-track count", handlers.count("soun"), 0)
 
     if errors:
         print("FlightGuard judge smoke: FAIL")
@@ -486,7 +524,7 @@ def main() -> int:
     print("challenge self-tests | no-op bit-exact | kill 0/8 success and 10.506417 m divergence | 14/14 gates")
     print("sampled ranges | mass 0.80046-1.19933 | thrust 0.80609-1.19861 | wind 0-0.59828 m/s^2 | delay 0-6")
     print("Radeon | 2,227,200 transitions | 4,632.58 -> 74,246.46 transitions/s | 16.027013647337444x")
-    print(f"workflow assets | Challenge Arena {video_frames['submission/flightguard-challenge-arena-v1.mp4']}/140 | reviewer video {video_frames['submission/flightguard-nominal-envelope-demo-v2.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
+    print(f"workflow assets | Challenge Arena {video_frames['submission/flightguard-challenge-arena-v1.mp4']}/140 | primary v3 {video_frames['submission/flightguard-challenge-arena-workflow-demo-v3.mp4']}/2100 | historical v2 {video_frames['submission/flightguard-nominal-envelope-demo-v2.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
     print("boundaries | simulation-only | sampled, not continuous | no SOTA/safety/sim-to-real/real-flight claim")
     print("retained lineage | v4 FAIL | v5 award-ineligible | v6 0/12 admitted with exact-Cal fallback")
     return 0

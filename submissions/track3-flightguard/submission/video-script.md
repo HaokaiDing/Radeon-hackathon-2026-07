@@ -19,61 +19,57 @@ The footer states the frozen paired aggregate: primary adversarial **194/384 = 5
 
 ---
 
-# FlightGuard 210-second Reviewer Video Script
+# FlightGuard 210-second Challenge Arena Workflow Video
 
-**Primary story:** FlightGuard is a Radeon-Native Sampled Nominal Flight Envelope Verifier for AMD Track 3.
+**Primary reviewer artifact:** [`flightguard-challenge-arena-workflow-demo-v3.mp4`](flightguard-challenge-arena-workflow-demo-v3.mp4)
 
-**Permanent boundary:** simulation-only; sampled contexts; visual replay is metric-ineligible.
+**Product story:** FlightGuard turns a visible Genesis mission failure into a matched, reproducible controller-qualification result on one AMD Radeon.
 
-| Time | Screen action | English voice-over / captions |
+**Permanent boundary:** simulation-only; sampled contexts; comparison against the project's nominal PD controller; no SOTA, safety, sim-to-real, certification, or real-flight claim.
+
+| Time | Screen action | Burned English caption |
 |---:|---|---|
-| 0–20 s | Title: **FlightGuard**. Subtitle: **Radeon-Native Sampled Nominal Flight Envelope Verifier**. Show Genesis quadrotor, three gates, one Radeon, and the simulation-only label. | “FlightGuard is a simulation-only Physical-AI application that asks a concrete question: can a quadrotor controller complete a three-gate mission across reproducible samples of vehicle and environment variation on one AMD Radeon?” |
-| 20–35 s | Animate the workflow: deterministic contexts → Genesis + `robust_z` → one Radeon through ROCm → mission and integrity checks → frozen JSON. | “It generates deterministic mass, thrust, wind, delay, and course contexts, runs Genesis through PyTorch ROCm, checks mission completion and data integrity, and exports hash-bound evidence.” |
-| 35–80 s | Play the existing fixed-seed 5001 truth-controller nominal visual. Keep `FIXED-SEED 5001 | TRUTH-CONTROLLER | NOMINAL VISUAL | SIMULATION ONLY | METRIC-INELIGIBLE` visible. | “This is the existing fixed-seed five thousand one truth-controller nominal visual. It demonstrates simulator motion only. It is not a heldout evidence context and is excluded from every reported metric. The aggregate result comes independently from six frozen raw metric files.” |
-| 80–115 s | Show three seed cards and a large result matrix: 384 paired contexts, 1,152 method episodes, three rows each at 384/384, zero strikes/failures/unfinished. | “Across seeds three-oh-three, three-oh-four, and three-oh-five, FlightGuard evaluated three hundred eighty-four paired heldout course contexts. Each registered method replica completed three hundred eighty-four of three hundred eighty-four missions and one thousand one hundred fifty-two gate passes, with zero strikes, terminal failures, or unfinished episodes.” |
-| 115–133 s | Show the sampled observed ranges: mass, thrust, wind norm, delay. Add `SAMPLED — NOT A CONTINUOUS GUARANTEE`. | “The observed samples span mass scale zero point eight zero zero four six to one point one nine nine three three, thrust scale zero point eight zero six zero nine to one point one nine eight six one, wind up to zero point five nine eight two eight meters per second squared, and action delay from zero to six steps.” |
-| 133–150 s | Collector card: 186/192, all tracked fields finite, applied saturation max 0.0. | “The training-distribution collector retained one hundred eighty-six of one hundred ninety-two environments. Position, velocity, quaternion, angular velocity, and issued and applied actions were finite. Maximum per-environment applied-action saturation was zero.” |
-| 150–180 s | Radeon scaling chart: 32, 128, 256, 512 environments. Show 4,632.58 → 74,246.46 transitions/s, 2,227,200 measured transitions, 16.027× speedup, max VRAM. | “On one Radeon, the fixed deployed simulation workload measured two million two hundred twenty-seven thousand two hundred transitions. Throughput rose from four thousand six hundred thirty-two point six at thirty-two environments to seventy-four thousand two hundred forty-six point five at five hundred twelve: sixteen point zero two seven times intra-device speedup.” |
-| 180–198 s | Brief research-lineage panel: v4 FAIL, v5 award-ineligible, v6 rejected. Keep it visually secondary to the nominal verifier. | “FlightGuard also preserves failed research branches. Version four missed its gate, version five added zero capability over calibrated fallback, and version six admitted zero lanes. These results remain visible as limitations, not as the project headline.” |
-| 198–210 s | End card: one command, evidence path, aggregate SHA prefix, and boundary checklist. | “The deliverable is a reproducible Radeon simulation verifier: source code, a one-command evidence check, frozen metrics, figures, and this workflow demo. It supports sampled nominal qualification in simulation. It does not claim physical flight, sim-to-real, safety, certification, dropout recovery, learned superiority, or a continuous envelope.” |
+| 0–7 s | Play the complete submitted Challenge Arena clip. The same Genesis scene shows nominal PD colliding while `robust_z` clears all three gates. | “Same scene and random stream: nominal collides; `robust_z` clears all three gates.” |
+| 7–20 s | Title/product card: **FlightGuard** and **Challenge Arena controller qualification**. | “FlightGuard turns a visible Genesis failure into a reproducible controller decision on one AMD Radeon.” |
+| 20–38 s | Workflow: freeze → pair → Genesis/ROCm → gates → frozen evidence. | “Freeze one hypothesis, pair every context, simulate on ROCm, enforce gates, and export frozen evidence.” |
+| 38–58 s | Terminal-style card with the frozen no-op command and submitted PASS output: Genesis 1.2.3, PyTorch ROCm, `cuda:0`, one visible AMD Radeon. | “This submitted no-op run reports Genesis 1.2.3, PyTorch ROCm, one visible AMD Radeon, and bit-exact PASS.” |
+| 58–88 s | Primary adversarial bars and cards: 194/384 → 371/384, +177, +46.1 pp, 93.16% failure reduction. | “On 384 primary adversarial pairs, mission success rises from 194 to 371 with zero nominal-only wins.” |
+| 88–108 s | Retention cards: 121/192 → 192/192, zero nominal-only wins; seed deltas +23, +26, +22. | “On 192 separate heldout pairs, `robust_z` retains every nominal success and reaches 192 of 192.” |
+| 108–128 s | Diagnostic cards: no-op bit-exact; zero action 0/8 success, 0 gates, 10.506417 m divergence. | “The no-op is bit-exact, while zero action yields zero successes and a 10.506417 meter divergence.” |
+| 128–150 s | Isolated intervention: `kp_z` 2.5→8.0 and `kd_z` 2.0→3.6. Mark all paired context variables unchanged. | “Only `kp_z` and `kd_z` change; initial state, gates, domain parameters, and random streams stay paired.” |
+| 150–175 s | One-Radeon scaling chart: 32, 128, 256, 512 environments and 2,227,200 measured transitions. | “A fixed one-Radeon workload scales from 32 to 512 environments over 2,227,200 measured transitions.” |
+| 175–193 s | Show `python3 scripts/judge_smoke.py` and its frozen PASS headlines. | “A CPU-only judge command checks raw metrics, diagnostics, aggregates, media, and claim boundaries.” |
+| 193–205 s | Application cards: find failure, qualify change, review evidence. | “The result is a controller-qualification workflow for embodied-AI researchers and flight-control developers.” |
+| 205–210 s | Final claim-boundary card. | “The claim is simulation-only and sampled: no SOTA, safety, sim-to-real, or real-flight conclusion.” |
 
 ## Required on-screen numbers
 
-- 384 paired heldout course contexts
-- 1,152 method episodes
-- each method replica: 384/384 mission success and 1,152 gate passes
-- zero strikes, mission failures, terminal failures, and unfinished episodes
-- collector: 186/192 survivors, all tracked fields finite, max per-environment applied saturation 0.0
-- sampled observed ranges:
-  - mass 0.80046–1.19933
-  - thrust 0.80609–1.19861
-  - wind norm 0–0.59828 m/s²
-  - action delay 0–6 steps
-- one-Radeon scaling: 2,227,200 transitions, 4,632.582556654058 → 74,246.46385791198 transitions/s, 16.027× speedup, 1.00169 parallel efficiency
-- aggregate evidence SHA-256: `c7ca6e460e967c3070736d8120bd918a3c489f1e7d62a3ae933ab631af827f58`
+- primary adversarial: 384 pairs, 194/384 → 371/384, +177, +46.1 pp, 93.16% failure reduction, zero nominal-only wins
+- retention heldout: 192 pairs, 121/192 → 192/192, +71, zero nominal-only wins
+- diagnostics: no-op bit-exact; zero action 0/8 mission success, 0 gates, 10.506417 m maximum paired-active position divergence
+- isolated controller change: `kp_z` 2.5→8.0; `kd_z` 2.0→3.6
+- one-Radeon scaling: 2,227,200 transitions; 32→512 environments; 16.027× intra-device speedup
+- frozen Challenge Arena summary SHA-256: `91b18677fa9fcb5f05acead2aa3fb4324188b44173ea85fda75c67e2dcb129ee`
 
 ## Required boundary captions
 
-Keep these exact concepts visible wherever the corresponding evidence appears:
-
 - `SIMULATION ONLY`
-- `SAMPLED CONTEXTS — NOT A CONTINUOUS GUARANTEE`
-- `VISUAL DEMO — METRIC-INELIGIBLE`
-- `THREE METHOD REPLICAS TIE — NO LEARNED SUPERIORITY CLAIM`
-- `MISSION METRICS DO NOT RECORD SATURATION`
-- `NO DROPOUT-RECOVERY CLAIM`
-
-The configured one-step dropout starts at step 999. It is more than 532 steps after each seed's reported mean terminal step, but the source lacks per-episode maximum terminal step. Do not say every episode finished before dropout.
+- `SAMPLED CONTEXTS ONLY`
+- `PROJECT NOMINAL PD BASELINE`
+- `NO SOTA / SAFETY / SIM-TO-REAL / REAL-FLIGHT CLAIM`
 
 ## Recording notes
 
-- Rendered artifact: `submission/flightguard-nominal-envelope-demo-v2.mp4`, 2,100 frames, 1280×720, 10 fps, 210.0 seconds, 17,428,715 bytes, SHA-256 `a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd`.
-- Renderer: `scripts/render_submission_video.py`, 26,993 bytes, SHA-256 `a0a17d91e15c92f8541da594c7c2ca04b97ce7c5326f61b08436798caace35cd`.
-- Embedded visual: fixed-seed 5001 truth-controller nominal clip, SHA-256 `adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce`, metric-ineligible.
-- Target: exactly 210 seconds at 1280×720 and 10 fps.
-- Use the fixed-seed 5001 truth-controller nominal clip only as a visual illustration; all result cards must cite the six raw metric files and frozen aggregate JSON.
-- Keep the first 35 seconds focused on the application, not on the failed v4/v5/v6 mechanisms.
-- Keep failed-mechanism lineage to the 18-second limitations segment.
-- Do not call the sampled observed ranges a certified or formal flight envelope.
-- Do not state mission saturation; saturation is available only for the collector.
-- Do not imply audio is already embedded unless an audio track is actually added and verified.
+- Rendered artifact: `submission/flightguard-challenge-arena-workflow-demo-v3.mp4`
+- Frames: 2,100
+- Resolution: 1280×720
+- FPS: 10
+- Duration: 210.0 seconds
+- Codec requested/reported: `mp4v` / `FMP4`
+- Audio: none
+- Size: 17,874,513 bytes
+- SHA-256: `d72057ff2a1bdf1796240a857f6451f545c070204ec6dcbe551f2dd039e00670`
+- Renderer: `scripts/render_challenge_arena_workflow_video_v3.py`, 32,850 bytes, SHA-256 `ed138fc753771172b8922ce83b6ebf52a1e2010247aadf87fa1e0cfb9883fe84`
+- The first 70 output frames consume all 140 frames of the 20 fps Challenge Arena clip by exact 2:1 downsampling.
+- All narration is burned English text; the MP4 has no audio track.
+- V2 remains a historical reviewer artifact and is still validated by `judge_smoke.py`.
