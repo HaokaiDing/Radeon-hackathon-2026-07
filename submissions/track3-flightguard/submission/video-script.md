@@ -1,3 +1,24 @@
+# FlightGuard 7-second Challenge Arena Clip
+
+**Recommended first view:** [`flightguard-challenge-arena-v1.mp4`](flightguard-challenge-arena-v1.mp4)
+
+| Time | Screen action | Caption meaning |
+|---:|---|---|
+| 0–3.35 s | Same Genesis scene and paired initial state. Left: nominal PD. Right: `robust_z`. Both approach the same three gates. | One controller change only: `kp_z` 2.5→8.0 and `kd_z` 2.0→3.6. |
+| 3.35–7.00 s | Freeze the left arm at its collision while the right arm continues through all three gates. | Nominal: collision, 0/3 gates, terminal step 167. `robust_z`: mission success, 3/3 gates, terminal step 479. |
+
+The footer states the frozen paired aggregate: primary adversarial **194/384 = 50.5% → 371/384 = 96.6% (+46.1 pp), zero regressions**. The displayed raw pair is seed 144856705, pair 0, chosen deterministically after aggregation by sorting `(seed, pair_index)`. The clip is simulation-only and makes no SOTA, safety, sim-to-real, certification, or real-flight claim.
+
+- Frames: 140
+- Resolution: 1280×720
+- FPS: 20
+- Duration: 7.0 seconds
+- Size: 2,146,360 bytes
+- SHA-256: `aabdea74a53e07ba0b77b52cab68a5fd5f5ed03e68b81aa3647ef36d49dd5b65`
+- Frozen summary: `evidence/challenge-arena/challenge-arena-summary.json`, SHA-256 `91b18677fa9fcb5f05acead2aa3fb4324188b44173ea85fda75c67e2dcb129ee`
+
+---
+
 # FlightGuard 210-second Reviewer Video Script
 
 **Primary story:** FlightGuard is a Radeon-Native Sampled Nominal Flight Envelope Verifier for AMD Track 3.

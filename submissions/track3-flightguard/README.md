@@ -17,12 +17,25 @@ Expected headline:
 FlightGuard judge smoke: PASS
 nominal envelope | 384 paired contexts | 1152 method episodes | every method 384/384
 collector | 186/192 survivors | all tracked fields finite | applied saturation max 0.0
+challenge arena | primary 194/384 -> 371/384 (+46.1 pp) | retention 121/192 -> 192/192 | 0 regressions
 Radeon | 2,227,200 transitions | 16.027013647337444x scaling
 ```
 
-The command validates the six submitted raw metric files, the aggregate hash, mission and collector totals, one-Radeon execution, throughput evidence, the retained falsification lineage, and the reviewer video assets. It is evidence-only: no GPU, simulator, training, or network access. The embedded Genesis clip is a fixed-seed 5001 truth-controller nominal visual; it is metric-ineligible and independent of the 384-context aggregate.
+The command validates the six nominal-envelope raw metric files, the Challenge Arena raw pairs and summary, mission and collector totals, one-Radeon execution, throughput evidence, retained falsification lineage, and reviewer video assets. It is evidence-only: no GPU, simulator, training, or network access.
 
-## Primary reviewer video
+## Start here — 7-second Challenge Arena
+
+[![FlightGuard Challenge Arena terminal frame: baseline collision versus robust mission success](submission/figures/challenge-arena-terminal.png)](submission/flightguard-challenge-arena-v1.mp4)
+
+[`submission/flightguard-challenge-arena-v1.mp4`](submission/flightguard-challenge-arena-v1.mp4) is a 7-second, 1280×720, 20 fps side-by-side replay of a frozen raw pair in the same Genesis scene. The nominal controller collides at step 167 with 0/3 gates; `robust_z` completes 3/3 gates at step 479 without a strike. The clip is visual evidence bound to the raw pair and summary; the aggregate metrics below come from all frozen pairs, not from the selected clip.
+
+Across three preregistered seeds in the primary adversarial suite, `robust_z` improves mission success from **194/384 = 50.5%** to **371/384 = 96.6%**: **+177 successes, +46.1 percentage points, 93.16% failure reduction, and zero nominal-only wins**. In a separate retention-heldout suite it improves **121/192 = 63.0%** to **192/192 = 100.0%**, again with zero nominal-only wins. All 14 frozen gates pass, including bit-exact no-op, kill magnitude, three positive seeds, finite paired traces, and maximum applied-action saturation 0.0.
+
+Only the vertical controller gains change (`kp_z`: 2.5→8.0, `kd_z`: 2.0→3.6); paired initial state, environment parameters, gates, and random streams remain identical. This is a sampled simulation comparison against the project's nominal PD baseline, not a SOTA, safety, sim-to-real, or real-flight claim.
+
+![Challenge Arena frozen aggregate](submission/figures/challenge-arena.svg)
+
+## Full reviewer video
 
 `submission/flightguard-nominal-envelope-demo-v2.mp4` is the positive-first 210-second reviewer artifact: 1280×720, 10 fps, 2,100 frames, reported codec `FMP4`, no audio, 17,428,715 bytes, SHA-256 `a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd`.
 
@@ -67,6 +80,17 @@ sampled mass / thrust / wind / delay contexts
 ```
 
 ## Verified result
+
+### Challenge Arena — paired controller capability
+
+The frozen comparison uses the same initial state, gate geometry, vehicle/environment parameters, and random stream for each nominal/`robust_z` pair. The controller setting was frozen before the three formal seeds were run.
+
+| Suite | Pairs | Nominal PD | `robust_z` | Added successes | Nominal-only wins |
+|---|---:|---:|---:|---:|---:|
+| Primary adversarial | 384 | 194/384 (50.5%) | 371/384 (96.6%) | +177 (+46.1 pp) | 0 |
+| Retention heldout | 192 | 121/192 (63.0%) | 192/192 (100.0%) | +71 (+37.0 pp) | 0 |
+
+Primary failures fall from 190 to 13, a 93.16% reduction. Every formal seed is positive (+57, +58, +62 successes), strikes fall from 178 to 13, terminal failures fall from 190 to 13, and maximum applied-action saturation is 0.0 for both arms. The no-op is bit-exact; a zero-action kill control produces 0/8 successes and 10.506417 m paired-active divergence, confirming that the evaluation responds to a real controller intervention.
 
 ### Heldout three-gate mission
 
@@ -147,6 +171,18 @@ cd submissions/track3-flightguard
 python3 scripts/judge_smoke.py
 ```
 
+### Recompute Challenge Arena from submitted raw bytes
+
+```bash
+arena_tmp=$(mktemp -d)
+tar -xzf submission/evidence/challenge-arena/challenge-arena-raw-json-v1.tar.gz -C "$arena_tmp"
+python3 scripts/summarize_challenge_arena.py \
+  --input-dir "$arena_tmp" \
+  --output "$arena_tmp/recomputed-summary.json"
+```
+
+The archive stores the eight original JSON byte streams. `judge_smoke.py` verifies the archive SHA, exact member inventory, every decompressed member SHA, all aggregates, and all 14 gates without extracting to disk. A recomputed summary changes only machine-specific `path`/`*_path` prefixes; after basename normalization the submitted and recomputed JSON documents are exact.
+
 ### Rebuild figures from frozen evidence
 
 ```bash
@@ -170,6 +206,8 @@ Open `http://127.0.0.1:8000`. The interface is schematic and cannot change the f
 
 | Artifact | SHA-256 | Meaning |
 |---|---|---|
+| `submission/evidence/challenge-arena/challenge-arena-summary.json` | `91b18677fa9fcb5f05acead2aa3fb4324188b44173ea85fda75c67e2dcb129ee` | frozen paired Challenge Arena aggregate; 14/14 gates PASS |
+| `submission/evidence/challenge-arena/challenge-arena-raw-json-v1.tar.gz` | `21647f791444aed708da5e056f17af98258fbc7605bb46acb4a148c0f6a6811b` | deterministic archive of the eight original raw JSON byte streams; 94,002 bytes |
 | `submission/evidence/verified-flight-envelope-aggregate.json` | `c7ca6e460e967c3070736d8120bd918a3c489f1e7d62a3ae933ab631af827f58` | positive aggregate of existing collector and heldout mission metrics |
 | `submission/evidence/raw-metrics/training-collector/seed303-metrics.json` | `aaa5e1e4654aec24b907527eb5334338a50f328c679eace8208b87f650e36959` | raw collector seed 303 |
 | `submission/evidence/raw-metrics/training-collector/seed304-metrics.json` | `61b70eead81696608a75436db23f59be9f01a25f65d09af9bc81a6d489010b54` | raw collector seed 304 |
@@ -185,7 +223,7 @@ Open `http://127.0.0.1:8000`. The interface is schematic and cannot change the f
 | `submission/evidence/capture-terminal.json` | `923c24124f9af6d53d82a80c9efd72d8e5ada962a4ceb30adf48e232c2c341be` | completed Radeon capture jobs |
 | `submission/evidence/frozen-claim-auditor-benchmark.json` | `ccbf38ef7aa36571c3f2433d5f4e9d54b1dd1de7cc2e8f93f2291ccc816f83f7` | four-case evidence-auditor benchmark |
 
-The aggregate was generated only from six existing source metric files. Their paths and SHA-256 values are recorded inside the aggregate.
+The nominal-envelope aggregate was generated only from six existing source metric files. The Challenge Arena summary independently binds its no-op, kill, three primary, and three retention raw JSON SHA-256 values plus the frozen config and runner. The deterministic archive preserves those eight original JSON byte streams while avoiding a 34,000-line review diff.
 
 ## Research lineage and honest stop decisions
 
@@ -200,6 +238,8 @@ These results demonstrate that the evaluation pipeline can reject an attractive 
 ## Deliverables
 
 - reproducible source code for Genesis/Radeon simulation and evaluation
+- paired Challenge Arena with frozen no-op, kill, three-seed primary, and retention evidence
+- 7-second side-by-side baseline-collision versus robust-success Genesis replay
 - hash-bound nominal mission and collector aggregate
 - one-Radeon scaling evidence
 - deterministic figures and machine-readable summaries
@@ -227,6 +267,7 @@ FlightGuard does not claim:
 - dropout recovery
 - learned-method superiority
 - population generalization
+- SOTA superiority; Challenge Arena compares two frozen controllers within this project
 
 ## Repository map
 
@@ -235,6 +276,10 @@ FlightGuard does not claim:
 - `tools/`: deterministic input and evidence builders
 - `docs/technical-report.md`: Track 3 technical report
 - `submission/evidence/`: frozen JSON evidence
+- `submission/evidence/challenge-arena/`: no-op, kill, three-seed primary, retention, and aggregate evidence
+- `submission/figures/challenge-arena.svg`: paired success comparison rebuilt from the frozen summary
+- `submission/figures/challenge-arena-terminal.png`: exact terminal frame from the paired replay
+- `submission/flightguard-challenge-arena-v1.mp4`: 7-second paired Genesis capability demo
 - `submission/figures/`: deterministic evidence views
 - `submission/video-script.md`: 210-second English narration and screen plan
 - `submission/flightguard-nominal-envelope-demo-v2.mp4`: primary positive-first 210-second reviewer video

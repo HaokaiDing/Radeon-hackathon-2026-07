@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+import tarfile
 from pathlib import Path
 from typing import Any
 
@@ -37,7 +38,31 @@ RAW_METRICS_SHA256 = {
 }
 RAW_METRICS = EVIDENCE / "raw-metrics"
 
+CHALLENGE_EVIDENCE = EVIDENCE / "challenge-arena"
+CHALLENGE_SUMMARY_SHA256 = "91b18677fa9fcb5f05acead2aa3fb4324188b44173ea85fda75c67e2dcb129ee"
+CHALLENGE_RAW_ARCHIVE = (
+    "challenge-arena-raw-json-v1.tar.gz",
+    "21647f791444aed708da5e056f17af98258fbc7605bb46acb4a148c0f6a6811b",
+    94_002,
+)
+CHALLENGE_RAW_MEMBER_SHA256 = {
+    "noop-seed264617362-recovery-v2.json": "d5a3a13989168452545c13f20c49ab6aa95f6b19626bb9d8617b0d8937e570e4",
+    "kill-seed881940697.json": "6f04a6e9ce3182255ef71e8996edaf0f7226dad223cab299119c4aac06c81178",
+    "primary-adversarial-seed831900462.json": "d9ab9e8d5423f8f0a69c466cffa5184fe049dae2be98a8bf842d3a87d5ae20f6",
+    "primary-adversarial-seed200501215.json": "ed43b7fd267dd7bd56f4be4b627cceb1d6d5f9c08d2527c87539dd5e304c009e",
+    "primary-adversarial-seed144856705.json": "f2e94d07896d238e2171f8ebde7cbd2fbc2328df08a32f116d87b501e9cbfa32",
+    "retention-heldout-seed831900462.json": "9bc3ffe552a59c5dc5c0a867a923024872dfd388f97f381712a7ad6cc72d688c",
+    "retention-heldout-seed200501215.json": "13702b5a7d3b8fbea87a57ed5eb0add444b6c19b62f75c4a360b7e50be0583bb",
+    "retention-heldout-seed144856705.json": "4d1ee9db7de0de04a6c2ab815a5a554f7c196774341725b6ac8699c9dcf5a14a",
+}
+
 WORKFLOW_ASSETS = (
+    (
+        "submission/flightguard-challenge-arena-v1.mp4",
+        "aabdea74a53e07ba0b77b52cab68a5fd5f5ed03e68b81aa3647ef36d49dd5b65",
+        2_146_360,
+        (140, 1_280, 720, 20.0),
+    ),
     (
         "submission/flightguard-nominal-envelope-demo-v2.mp4",
         "a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd",
@@ -63,6 +88,17 @@ RENDERER_ASSET = (
     "scripts/render_submission_video.py",
     "a0a17d91e15c92f8541da594c7c2ca04b97ce7c5326f61b08436798caace35cd",
     26_993,
+)
+CHALLENGE_CODE_ASSETS = (
+    ("configs/challenge_arena_v1.json", "af30cfdaaecb1b00ec477a2a22b96eeaf25b328327b11a43f04f1e570045173d", 2_989),
+    ("scripts/run_challenge_arena_amd.py", "cd0898cde2630a686f3cbded0463c06f20dc7b3e9c8a742b4df7ed95ba21c4d6", 27_746),
+    ("scripts/summarize_challenge_arena.py", "e966bee62ebd685ff06a7f1054b3468f8568eb08f169ced88e2213fe96c69a26", 14_876),
+    ("scripts/render_challenge_arena_pair_amd.py", "9f68a91013b943e4642f86d2ba96472ba41221826f96f9eb363610f7f1dd5e8f", 20_815),
+    ("scripts/build_challenge_arena_figure.py", "21fb3afe2b70fb224d7af8e67d2a5777c2a8f73fc4199af11c78abc6b76ba355", 8_032),
+)
+CHALLENGE_STATIC_ASSETS = (
+    ("submission/figures/challenge-arena.svg", "7144d4c82a774a5249f45faf6073ee9a12900128390170cb072ffa18feff4532", 10_135),
+    ("submission/figures/challenge-arena-terminal.png", "1d60af874454fffd6d1c7064e90606551534b2748cee717d2cd27c5c85a21d01", 678_621),
 )
 
 
@@ -153,6 +189,50 @@ def main() -> int:
             raw_documents[relative] = load_object(path)
         except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
             errors.append(f"invalid raw metric JSON: {relative}: {exc}")
+
+    challenge_documents: dict[str, dict[str, Any]] = {}
+    challenge_summary_path = CHALLENGE_EVIDENCE / "challenge-arena-summary.json"
+    if not challenge_summary_path.is_file():
+        errors.append("missing Challenge Arena summary")
+    elif sha256(challenge_summary_path) != CHALLENGE_SUMMARY_SHA256:
+        errors.append("Challenge Arena summary SHA mismatch")
+    else:
+        try:
+            challenge_documents["challenge-arena-summary.json"] = load_object(challenge_summary_path)
+        except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+            errors.append(f"invalid Challenge Arena summary: {exc}")
+
+    archive_name, archive_sha, archive_size = CHALLENGE_RAW_ARCHIVE
+    archive_path = CHALLENGE_EVIDENCE / archive_name
+    if not archive_path.is_file():
+        errors.append(f"missing Challenge Arena raw archive: {archive_name}")
+    else:
+        equal(errors, "Challenge Arena raw archive size", archive_path.stat().st_size, archive_size)
+        equal(errors, "Challenge Arena raw archive SHA", sha256(archive_path), archive_sha)
+        try:
+            with tarfile.open(archive_path, "r:gz") as archive:
+                members = archive.getmembers()
+                equal(errors, "Challenge Arena raw archive members", [member.name for member in members], sorted(CHALLENGE_RAW_MEMBER_SHA256))
+                for member in members:
+                    if not member.isfile() or member.name not in CHALLENGE_RAW_MEMBER_SHA256:
+                        errors.append(f"invalid Challenge Arena archive member: {member.name}")
+                        continue
+                    handle = archive.extractfile(member)
+                    if handle is None:
+                        errors.append(f"unreadable Challenge Arena archive member: {member.name}")
+                        continue
+                    payload = handle.read()
+                    actual_sha = hashlib.sha256(payload).hexdigest()
+                    equal(errors, f"Challenge Arena member SHA {member.name}", actual_sha, CHALLENGE_RAW_MEMBER_SHA256[member.name])
+                    try:
+                        value = json.loads(payload)
+                        if not isinstance(value, dict):
+                            raise ValueError("JSON root is not an object")
+                        challenge_documents[member.name] = value
+                    except (UnicodeError, json.JSONDecodeError, ValueError) as exc:
+                        errors.append(f"invalid Challenge Arena archive JSON {member.name}: {exc}")
+        except (OSError, tarfile.TarError) as exc:
+            errors.append(f"invalid Challenge Arena raw archive: {exc}")
 
     if len(documents) == len(EXPECTED_SHA256):
         envelope = documents["verified-flight-envelope-aggregate.json"]
@@ -322,6 +402,50 @@ def main() -> int:
         equal(errors, "auditor status", auditor.get("status"), "PASS")
         equal(errors, "auditor confusion", [auditor["confusion"][key] for key in ("true_positive", "true_negative", "false_positive", "false_negative")], [1, 3, 0, 0])
 
+    if len(challenge_documents) == 1 + len(CHALLENGE_RAW_MEMBER_SHA256):
+        challenge = challenge_documents["challenge-arena-summary.json"]
+        equal(errors, "Challenge Arena status", challenge.get("status"), "PASS")
+        equal(errors, "Challenge Arena simulation-only", challenge.get("simulation_only"), True)
+        challenge_gates = challenge.get("gates", {})
+        equal(errors, "Challenge Arena gate count", len(challenge_gates), 14)
+        equal(errors, "Challenge Arena all gates", all(challenge_gates.values()), True)
+
+        primary = challenge["primary"]
+        equal(errors, "Challenge Arena primary pairs", primary.get("pair_count"), 384)
+        equal(errors, "Challenge Arena primary nominal/robust", [primary.get("nominal_success_count"), primary.get("robust_success_count")], [194, 371])
+        equal(errors, "Challenge Arena primary delta", [primary.get("success_delta_count"), primary.get("success_delta_percentage_points")], [177, 46.09375])
+        equal(errors, "Challenge Arena primary nominal-only wins", primary.get("nominal_only_success"), 0)
+        equal(errors, "Challenge Arena primary failure reduction", primary.get("failure_reduction_fraction"), 0.9315789473684211)
+        equal(errors, "Challenge Arena primary strikes", [primary.get("nominal_strike_count"), primary.get("robust_strike_count")], [178, 13])
+        equal(errors, "Challenge Arena primary terminal failures", [primary.get("nominal_terminal_failure_count"), primary.get("robust_terminal_failure_count")], [190, 13])
+        equal(errors, "Challenge Arena primary saturation", primary.get("maximum_applied_saturation_fraction"), {"nominal": 0.0, "robust_z": 0.0})
+        equal(errors, "Challenge Arena primary per-seed deltas", sorted(primary.get("per_seed_success_delta", {}).values()), [57, 58, 62])
+
+        retention = challenge["retention"]
+        equal(errors, "Challenge Arena retention pairs", retention.get("pair_count"), 192)
+        equal(errors, "Challenge Arena retention nominal/robust", [retention.get("nominal_success_count"), retention.get("robust_success_count")], [121, 192])
+        equal(errors, "Challenge Arena retention delta", retention.get("success_delta_count"), 71)
+        equal(errors, "Challenge Arena retention nominal-only wins", retention.get("nominal_only_success"), 0)
+        equal(errors, "Challenge Arena retention saturation", retention.get("maximum_applied_saturation_fraction"), {"nominal": 0.0, "robust_z": 0.0})
+
+        noop = challenge_documents["noop-seed264617362-recovery-v2.json"]
+        equal(errors, "Challenge Arena no-op status", noop.get("status"), "PASS")
+        equal(errors, "Challenge Arena no-op bit exact", noop.get("diagnostic", {}).get("bit_exact"), True)
+        equal(errors, "Challenge Arena no-op fields", noop.get("diagnostic", {}).get("required_fields"), ["issued_action", "applied_action", "state", "gate", "terminal"])
+
+        kill = challenge_documents["kill-seed881940697.json"]
+        equal(errors, "Challenge Arena kill status", kill.get("status"), "PASS")
+        equal(errors, "Challenge Arena kill zero-action success", kill["arms"]["zero_action"].get("mission_success_count"), 0)
+        equal(errors, "Challenge Arena kill divergence", kill.get("diagnostic", {}).get("maximum_position_divergence_m"), 10.506417274475098)
+        equal(errors, "Challenge Arena kill checks", all(kill.get("diagnostic", {}).get("checks", {}).values()), True)
+
+        source_rows = challenge["per_seed"]["primary"] + challenge["per_seed"]["retention"]
+        equal(errors, "Challenge Arena one visible Radeon", [row["runtime"]["visible_gpu_count"] for row in source_rows], [1] * 6)
+        equal(errors, "Challenge Arena GPU name", [row["runtime"]["gpu_name"] for row in source_rows], ["AMD Radeon Graphics"] * 6)
+        boundaries = challenge["claim_boundary"]
+        for key in ("real_flight_claim", "safety_or_certification_claim", "sim_to_real_claim", "sota_baseline_claim", "tuning_after_unblinding_permitted"):
+            equal(errors, f"Challenge Arena boundary {key}", boundaries.get(key), False)
+
     for relative in STATIC_FILES:
         path = ROOT / relative
         if not path.is_file() or path.stat().st_size == 0:
@@ -334,6 +458,14 @@ def main() -> int:
     else:
         equal(errors, "renderer size", renderer_path.stat().st_size, renderer_size)
         equal(errors, "renderer SHA", sha256(renderer_path), renderer_sha)
+
+    for relative, expected_sha, expected_size in CHALLENGE_CODE_ASSETS + CHALLENGE_STATIC_ASSETS:
+        path = ROOT / relative
+        if not path.is_file():
+            errors.append(f"missing Challenge Arena asset: {relative}")
+            continue
+        equal(errors, f"size {relative}", path.stat().st_size, expected_size)
+        equal(errors, f"SHA {relative}", sha256(path), expected_sha)
 
     video_frames: dict[str, int] = {}
     for relative, expected_sha, expected_size, expected_meta in WORKFLOW_ASSETS:
@@ -350,10 +482,12 @@ def main() -> int:
     print("nominal envelope | 384 paired contexts | 1152 method episodes | every method 384/384")
     print("mission integrity | 0 strikes | 0 mission/terminal failures | 0 unfinished | all finite")
     print("collector | 186/192 survivors | all tracked fields finite | applied saturation max 0.0")
+    print("challenge arena | primary 194/384 -> 371/384 (+46.1 pp) | retention 121/192 -> 192/192 | 0 regressions")
+    print("challenge self-tests | no-op bit-exact | kill 0/8 success and 10.506417 m divergence | 14/14 gates")
     print("sampled ranges | mass 0.80046-1.19933 | thrust 0.80609-1.19861 | wind 0-0.59828 m/s^2 | delay 0-6")
     print("Radeon | 2,227,200 transitions | 4,632.58 -> 74,246.46 transitions/s | 16.027013647337444x")
-    print(f"workflow assets | reviewer video {video_frames['submission/flightguard-nominal-envelope-demo-v2.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
-    print("boundaries | simulation-only | sampled, not continuous | method replicas tie | no dropout-recovery claim")
+    print(f"workflow assets | Challenge Arena {video_frames['submission/flightguard-challenge-arena-v1.mp4']}/140 | reviewer video {video_frames['submission/flightguard-nominal-envelope-demo-v2.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
+    print("boundaries | simulation-only | sampled, not continuous | no SOTA/safety/sim-to-real/real-flight claim")
     print("retained lineage | v4 FAIL | v5 award-ineligible | v6 0/12 admitted with exact-Cal fallback")
     return 0
 
