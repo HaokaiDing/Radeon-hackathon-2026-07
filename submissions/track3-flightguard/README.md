@@ -37,7 +37,9 @@ Only the vertical controller gains change (`kp_z`: 2.5→8.0, `kd_z`: 2.0→3.6)
 
 ## Full reviewer video
 
-`submission/flightguard-nominal-envelope-demo-v2.mp4` is the positive-first 210-second reviewer artifact: 1280×720, 10 fps, 2,100 frames, reported codec `FMP4`, no audio, 17,428,715 bytes, SHA-256 `a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd`.
+[`submission/flightguard-nominal-envelope-demo-v2.mp4`](submission/flightguard-nominal-envelope-demo-v2.mp4) is the positive-first 210-second reviewer artifact: 1280×720, 10 fps, 2,100 frames, reported codec `FMP4`, no audio, 17,428,715 bytes, SHA-256 `a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd`.
+
+[`submission/flightguard-genesis-workflow-demo.mp4`](submission/flightguard-genesis-workflow-demo.mp4) is the companion Genesis workflow recording.
 
 Its 00:30–01:20 segment embeds the existing `submission/genesis-nominal-visual-replay.mp4`: fixed seed 5001, truth-controller, nominal simulation visual, 500 frames, SHA-256 `adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce`. The clip is metric-ineligible and is not one of the 384 heldout evidence contexts. Numeric cards are independently derived from the six submitted raw metric JSON files and the aggregate.
 
@@ -164,6 +166,108 @@ FlightGuard's Radeon value comes from two independently frozen one-Radeon campai
 - Genesis dependencies listed by the project environment
 - OpenCV only for video metadata checks in `judge_smoke.py`
 
+The event-cloud run was validated with Python 3.12.3,
+PyTorch `2.9.1+gitff65f5b`, HIP `7.2.53211-e1a6bc5663`, and Genesis
+1.2.3 on one visible Radeon GPU. A compatible AMD ROCm/PyTorch environment is
+a platform prerequisite; installing this package must not replace that stack.
+
+Portable project/bootstrap install after the ROCm PyTorch environment is ready:
+
+```bash
+python -m pip install -e '.[sim]'
+# Optional: only judge_smoke.py video-metadata checks require OpenCV.
+python -m pip install opencv-python-headless
+```
+
+On the event cloud, the frozen protocol binds the Genesis 1.2.3 source tree at
+`/workspace/genesis-v1.2.3-src-b`. Use this exact prefix from
+`submissions/track3-flightguard`:
+
+```text
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0
+```
+
+### Validate and reconstruct the frozen Challenge Arena
+
+The reconstruction launcher leaves the frozen runner, config, and evidence
+unchanged. It verifies their submitted SHA-256 values, checks that the frozen
+source commit is an ancestor of the submission and that
+`src/flightguard` is unchanged, then creates a temporary worktree at that
+commit and materializes the exact submitted runner and config bytes.
+
+CPU-only reconstruction check:
+
+```bash
+cd submissions/track3-flightguard
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src \
+PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --validate-only --work-root /workspace
+```
+
+### Full one-Radeon Challenge Arena rerun
+
+Run these eight jobs serially. The timestamped directory keeps every output
+fresh and gives the files exactly the names consumed by the submitted
+summarizer.
+
+```bash
+cd submissions/track3-flightguard
+REPRO_DIR="/workspace/flightguard-challenge-arena-repro-$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir "$REPRO_DIR"
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/noop-seed264617362-recovery-v2.json" \
+  --mode noop --domain-profile adversarial --seed 264617362 --pairs 8 --steps 800
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/kill-seed881940697.json" \
+  --mode kill --domain-profile adversarial --seed 881940697 --pairs 8 --steps 800
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/primary-adversarial-seed831900462.json" \
+  --mode compare --domain-profile adversarial --seed 831900462 --pairs 128 --steps 1500
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/primary-adversarial-seed200501215.json" \
+  --mode compare --domain-profile adversarial --seed 200501215 --pairs 128 --steps 1500
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/primary-adversarial-seed144856705.json" \
+  --mode compare --domain-profile adversarial --seed 144856705 --pairs 128 --steps 1500
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/retention-heldout-seed831900462.json" \
+  --mode compare --domain-profile heldout --seed 831900462 --pairs 64 --steps 1500
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/retention-heldout-seed200501215.json" \
+  --mode compare --domain-profile heldout --seed 200501215 --pairs 64 --steps 1500
+
+PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src PYGLET_HEADLESS=1 HIP_VISIBLE_DEVICES=0 \
+/opt/venv/bin/python3.12 scripts/reconstruct_challenge_arena_amd.py \
+  --work-root /workspace --output "$REPRO_DIR/retention-heldout-seed144856705.json" \
+  --mode compare --domain-profile heldout --seed 144856705 --pairs 64 --steps 1500
+
+chmod 0444 "$REPRO_DIR"/*.json
+python3 scripts/summarize_challenge_arena.py \
+  --input-dir "$REPRO_DIR" \
+  --output "$REPRO_DIR/challenge-arena-summary.json"
+```
+
+A matching rerun should reproduce the scientific records: pair traces,
+diagnostics, integrity flags, arm aggregates, paired outcomes, and per-stratum
+results. Temporary absolute paths, `runtime.elapsed_s`, and
+`runtime.transitions_per_s` are machine/run metadata and can differ, so raw
+JSON and recomputed-summary SHA-256 values need not equal the submitted hashes.
+
 ### Evidence-only verification
 
 ```bash
@@ -180,6 +284,8 @@ python3 scripts/summarize_challenge_arena.py \
   --input-dir "$arena_tmp" \
   --output "$arena_tmp/recomputed-summary.json"
 ```
+
+This evidence-byte recomputation is a fast, CPU-only check of the submitted raw bytes; it is distinct from the eight-job simulation rerun above.
 
 The archive stores the eight original JSON byte streams. `judge_smoke.py` verifies the archive SHA, exact member inventory, every decompressed member SHA, all aggregates, and all 14 gates without extracting to disk. A recomputed summary changes only machine-specific `path`/`*_path` prefixes; after basename normalization the submitted and recomputed JSON documents are exact.
 
