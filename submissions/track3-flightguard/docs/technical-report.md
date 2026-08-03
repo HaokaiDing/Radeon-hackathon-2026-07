@@ -3,10 +3,10 @@
 ## Project information
 
 - **Project:** FlightGuard
-- **Submission framing:** Radeon-native fail-closed embodied-flight claim auditor
+- **Submission framing:** Radeon-Native Sampled Nominal Flight Envelope Verifier
 - **Track:** Track 3 — Physical AI Challenge
 - **Execution scope:** Genesis simulation on one AMD Radeon GPU through PyTorch ROCm
-- **Evidence scope:** simulation-only; single T265 development event; causal only relative to a ROS bag record-time availability proxy
+- **Evidence scope:** sampled nominal simulation evidence; no physical-flight, sim-to-real, safety, certification, or continuous-envelope claim
 
 ## Team member and contribution
 
@@ -14,83 +14,76 @@
 
 ## Datasets and evaluation inputs
 
-FlightGuard uses no learned training dataset in this submission. Evaluation inputs are procedural Genesis flight contexts plus frozen, checkpoint-specific sensor-error and fault banks. A single T265 availability-pattern development event informed only the record-time availability schedule used by the paired simulation protocol. It is not a population dataset, physical-flight evaluation set, or basis for a sim-to-real claim.
+FlightGuard uses procedural Genesis contexts rather than a learned training dataset. The primary evaluation inputs are deterministic domain-randomized samples from seeds 303, 304, and 305. The heldout suite covers 384 paired three-gate course contexts; three registered method replicas produce 1,152 method episodes. The training-distribution collector covers another 192 environments.
 
-The submitted evaluator reads the frozen JSON evidence under submission/evidence/. Those files bind the simulated contexts, registered banks, audit outcomes, and one-Radeon scaling run; they do not expand the claim boundary beyond simulation-only evidence.
+Across the heldout samples, observed mass scale spans 0.80046–1.19933, thrust scale 0.80609–1.19861, wind-acceleration norm 0–0.59828 m/s², and action delay 0–6 steps. These are observed sampled ranges, not a continuous hyper-rectangle guarantee or formal envelope certificate.
+
+The positive aggregate is frozen at `submission/evidence/verified-flight-envelope-aggregate.json`, SHA-256 `c7ca6e460e967c3070736d8120bd918a3c489f1e7d62a3ae933ab631af827f58`. It records the six source metric paths and hashes. Historical v4/v5/v6 sensor-fault artifacts remain in the submission as secondary falsification lineage.
 
 ## Project overview
 
-Embodied-AI demos often report the best downstream score while hiding whether a proposed mechanism is identifiable, stable, or even different from its fallback. FlightGuard packages the opposite behavior: frozen inputs, matched simulation histories, device-native recurrence checks, preregistered scientific gates, exact fallback, and an auditable stop decision.
+FlightGuard is a Radeon-native application for reproducibly qualifying a simulated quadrotor controller over sampled off-nominal conditions. It generates deterministic mass, thrust, wind, delay, and gate-course contexts; runs three-gate missions in Genesis through PyTorch ROCm; checks mission and tensor-integrity outcomes; and exports hash-bound evidence that can be verified without rerunning the simulator.
 
-The current submission does not claim a new flight estimator. It demonstrates an evidence pipeline that rejected three increasingly constrained mechanisms without rewriting the result.
+The primary result is positive: over 384 paired heldout course contexts, each of the three registered replicas completed 384/384 missions with zero strikes, terminal failures, or unfinished episodes. A separate training-distribution collector retained 186/192 environments with every tracked field finite and zero applied-action saturation.
 
 ## Motivation and application
 
-Flight stacks combine simulators, sensor transforms, estimators, controllers, and accelerators. A friendly aggregate can arise from an implementation mismatch, an always-on fallback, or an unidentifiable latent state. FlightGuard targets robotics teams that need to know whether a proposed change adds capability before investing in hardware testing.
+Robotics teams need an inexpensive way to determine whether a controller remains usable across a defined sample of vehicle and environment variation before committing to hardware tests. FlightGuard turns that question into a repeatable Radeon simulation workload and a compact evidence package.
 
-The practical output is a compact decision package: frozen summaries, exact hashes, deterministic figures, a static demo, and explicit claim exclusions. It supports review, experiment triage, and reproducibility; it is not a safety case.
+The target users are embodied-AI researchers and flight-control developers. The practical outputs are a sampled nominal qualification result, per-seed source metrics, one-Radeon performance measurements, deterministic figures, a reviewer video, and explicit exclusions. FlightGuard supports experiment triage and controller qualification in simulation; it is not a safety case.
 
 ## Technical architecture
 
-The v6 candidate is a frozen eight-state observer with state order `[b_ax, b_ay, b_az, b_gx, b_gy, b_gz, delta_roll, delta_pitch]`. It consumes native IMU samples plus record-time VIO pose increments. The schedule is fixed:
+The primary workflow has five stages:
 
-- fit on steps 0–199;
-- holdout on steps 200–299 with zero parameter updates;
-- freeze at step 300;
-- use exact calibrated fallback on any rejected lane.
+1. Deterministically sample training-distribution and heldout domain parameters.
+2. Run the Genesis quadrotor with the `robust_z` controller on one visible Radeon GPU.
+3. Evaluate a three-gate course for three registered method replicas over seeds 303–305.
+4. Check completion, strikes, terminal failures, unfinished episodes, field finiteness, and collector action saturation.
+5. Freeze the source bindings and aggregate metrics for evidence-only verification.
 
-Each run is bound to a frozen legacy protocol, seed bank, configuration, and checkpoint-specific 800-step sensor-error bank. The capture queue executes checkpoints serially on one Radeon. Before observer metrics are trusted, the evaluator repeats the raw-to-delivered transform on Radeon and checks:
+The registered replicas `constant_velocity`, `hold_last`, and `learned` tie exactly in the reported mission data. Therefore the supported capability is the shared `robust_z` controller plus domain-randomized evaluator, not learned-method superiority.
 
-1. delivered force and gyro recurrence by raw bits;
-2. disabled-transform no-op by raw bits;
-3. enabled-transform kill magnitude for both force and gyro.
-
-The lane gate then requires rank 8, normalized sigma ratio ≥ 1e-3, split-half stability, Δv RMSE ≤ 0.90×Cal, rotation RMSE ≤ 0.90×Cal, and both q95 ratios ≤ 1.0. A checkpoint needs at least 9/12 admitted lanes; the three-checkpoint aggregate would need at least 30/36.
+The repository also contains a secondary falsification pipeline for v4/v5/v6 estimator candidates. It uses frozen protocols, no-op and kill-magnitude self-tests, lane-level observability gates, and exact calibrated fallback. Those candidates did not pass their scientific gates and are retained as limitations rather than used as the primary application claim.
 
 ## AMD hardware and software use
 
-The frozen capture terminal records three completed jobs on `AMD Radeon Graphics`. Execution used a single visible GPU and a serial queue. Genesis generated the capture traces through the PyTorch HIP/ROCm path. The corrected recurrence evaluator also replays the sensor transform on Radeon, avoiding two observed CPU/Radeon half-bin rounding differences while retaining raw-bit checks.
+Every source mission and collector run reports exactly one visible `AMD Radeon Graphics`. Genesis executes the batched simulation through the PyTorch HIP/ROCm path. GPU jobs were serialized, and the frozen source metrics retain device identity, seed, domain profile, and integrity results.
 
-A separate frozen scaling run measured the fixed r5 nominal deployed simulation pipeline on one Radeon. It processed 2,227,200 measured transitions across 32, 128, 256, and 512 environments. This is throughput and utilization evidence only; it does not change the v4/v5/v6 scientific verdicts.
+A separate fixed-workload scaling run measured 2,227,200 transitions at 32, 128, 256, and 512 environments on one Radeon. Mean throughput increased from 4,632.582556654058 to 74,246.46385791198 transitions/s: 16.027013647337444× speedup and 1.0016883529585903 parallel efficiency. Maximum observed VRAM was 962,785,280 bytes.
 
 ## Innovation
 
-The contribution is the integration of scientific falsification with an accelerator-native embodied simulation pipeline:
+FlightGuard combines three elements that are usually presented separately:
 
-- device-native recurrence before scientific interpretation;
-- no-op and kill-magnitude self-tests before an expensive run;
-- lane-level identifiability and holdout gates;
-- exact-Cal fallback rather than silent candidate substitution;
-- a mandatory stop rule that preserves negative evidence;
-- deterministic evidence rendering directly from verified JSON.
+- a deterministic Physical-AI domain-randomization suite;
+- a Radeon-native Genesis execution path with measured batched scaling;
+- hash-bound, evidence-only review of mission and integrity outcomes.
 
-This changes the deliverable from “a mechanism that appears to work” to “a reviewable statement of what the mechanism did and did not establish.”
+The application value is the complete loop: sampled condition generation → Radeon simulation → mission qualification → frozen evidence. The retained v4/v5/v6 failures add a second contribution: the same project records when an attractive estimator mechanism does not earn a claim.
 
 ## Evaluation and exact results
 
-### v4 — causal IMU repair
+### Primary result — sampled heldout three-gate missions
 
-Across 36 fault episodes per arm, CausalIMUPatch succeeded 11 times, ActionOnly 0, RawStrapdown 33, and CalibratedStrapdown 32. Patch failure reduction versus ActionOnly was 30.56%, below the preregistered 50% gate, and Patch was worse than Raw and Cal on required metrics. Verdict: **scientific FAIL**.
+Across 384 paired heldout course contexts and 1,152 method episodes:
 
-### v5 — residual-q95 quarantine scout
+- `constant_velocity`: 384/384 mission successes, 1,152 gate passes;
+- `hold_last`: 384/384 mission successes, 1,152 gate passes;
+- `learned`: 384/384 mission successes, 1,152 gate passes;
+- all three: 0 strikes, 0 mission failures, 0 terminal failures, and 0 unfinished episodes;
+- all tracked mission fields finite;
+- every source run used exactly one visible Radeon GPU.
 
-Across 12 fault episodes per arm, Patch succeeded 10 times, ActionOnly 0, and Cal 10. Patch and Cal both succeeded on 12/12 nominal episodes. Nineteen post-onset operational fields were raw-bit exact for Patch and Cal at each checkpoint. The development gates passed, but incremental capability was 0. Verdict: **development PASS, award-ineligible**.
+The methods tie exactly, so no learned-superiority claim is made. The configured one-step dropout starts at step 999, more than 532 steps after each seed's reported mean terminal step. Because the source does not expose maximum per-episode terminal step, this does not establish dropout recovery or prove every episode ended before step 999.
 
-### v6 — frozen observer observability audit
+### Primary result — training-distribution collector
 
-Checkpoint 30 contained 12 lanes. Recurrence, no-op, and kill checks passed. Every lane had numerical rank 8; normalized sigma ratios ranged from 0.019169591096042157 to 0.0321526465925691. The remaining gates failed:
+The collector retained 63/64, 62/64, and 61/64 environments for seeds 303, 304, and 305: 186/192 = 96.875%. Position, velocity, quaternion, angular velocity, issued action, and applied action were finite in every source run. Maximum per-environment applied-action saturation fraction was 0.0.
 
-- split-half stability: 0/12;
-- Δv RMSE ≤ 0.90×Cal: 0/12;
-- rotation RMSE ≤ 0.90×Cal: 0/12;
-- Δv q95 ≤ Cal: 3/12;
-- rotation q95 ≤ Cal: 3/12.
+The heldout mission metrics contain no saturation field, so the saturation result is limited to the collector.
 
-No lane was admitted and all 12 used exact-Cal fallback. Verdict: **scientific FAIL; stop candidate A**. Checkpoints 31 and 32 were not audited after the checkpoint-30 stop condition.
-
-### Radeon scaling — fixed r5 nominal deployed pipeline
-
-The frozen one-Radeon run achieved the following mean throughput:
+### Radeon scaling — fixed r5 deployed pipeline
 
 | Environments | Mean transitions/s | GPU-use mean | CV |
 |---:|---:|---:|---:|
@@ -99,48 +92,66 @@ The frozen one-Radeon run achieved the following mean throughput:
 | 256 | 36,383.01129648785 | 77.0864% | 0.002506217057283922 |
 | 512 | 74,246.46385791198 | 78.4684% | 0.0033317633931520337 |
 
-The 512/32 speedup was 16.027013647337444× and parallel efficiency was 1.0016883529585903. GPU use reached 86%; maximum observed VRAM was 962,785,280 bytes. The preregistered throughput acceptance was achieved. These numbers describe only the simulation workload and one Radeon, not candidate-mechanism superiority.
+The 512/32 speedup was 16.027013647337444×; parallel efficiency was 1.0016883529585903; GPU use reached 86%; maximum observed VRAM was 962,785,280 bytes. These measurements cover this fixed simulation workload on one Radeon.
 
-### Frozen four-case synthetic claim audit
+### Retained falsification lineage
 
-A generic eq/ge/le constraint evaluator read the four frozen artifact bytes, verified their SHA-256 bindings, and decided all cases before consulting expected labels. It produced 1 ACCEPT and 3 REJECT with TP=1, TN=3, FP=0, FN=0, accuracy 1.0, false-accept count 0, and maximum decision latency 37.38 µs. This is a frozen four-case synthetic corpus result only—not robot capability, safety, or general classifier accuracy. Evaluator SHA-256: `33c58e5ecf3c861ff931421c488fbdbb3293f47cbb9edd7164d27f025931abe9`; result SHA-256: `ccbf38ef7aa36571c3f2433d5f4e9d54b1dd1de7cc2e8f93f2291ccc816f83f7`.
+#### v4 — causal IMU repair
+
+Across 36 fault episodes per arm, CausalIMUPatch succeeded 11 times, ActionOnly 0, RawStrapdown 33, and CalibratedStrapdown 32. Patch failure reduction versus ActionOnly was 30.56%, below the preregistered 50% gate. Verdict: **scientific FAIL**.
+
+#### v5 — residual-q95 quarantine scout
+
+Across 12 fault episodes per arm, Patch and Cal each succeeded 10 times under fault and 12/12 nominal. Nineteen post-onset operational fields were raw-bit exact. Verdict: **development PASS, award-ineligible; incremental capability 0**.
+
+#### v6 — frozen observer observability audit
+
+Checkpoint 30 contained 12 lanes. Every lane had numerical rank 8, but 0/12 passed split-half stability, 0/12 passed either RMSE ≤ 0.90×Cal gate, and only 3/12 passed each q95 gate. No lane was admitted; all 12 used exact-Cal fallback. Checkpoints 31 and 32 were not audited after the stop rule. Verdict: **scientific FAIL**.
+
+### Frozen four-case claim audit
+
+A generic constraint evaluator verified the four historical frozen artifacts and produced 1 ACCEPT / 3 REJECT with TP=1, TN=3, FP=0, FN=0 and maximum decision latency 37.38 µs. This is a four-case synthetic evidence check, not a robot-capability or general-accuracy result.
 
 ## Upstream contribution
 
-A separate software-only contribution is available as [Genesis draft PR #3159](https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159) at commit `09b3e04132a15d6c842835829e277c9cbff4cce3`. Its scope is the AMD Docker alignment from PyTorch 2.6 to AMD's official PyTorch 2.8 image plus a static regression test. The PR remains open, draft, and unmerged. The 9.4 GB image was not pulled or built; no container runtime success, acceptance, or merge is claimed. This software contribution is not counted as robot capability and does not change the v4/v5/v6 scientific verdicts.
+A separate software-only contribution is available as [Genesis PR #3159](https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159) at commit `09b3e04132a15d6c842835829e277c9cbff4cce3`. Its scope is the AMD Docker alignment from PyTorch 2.6 to AMD's official PyTorch 2.8 image plus a static regression test. The PR remains open, ready for review, and unmerged. The 9.4 GB image was not pulled or built; no container runtime success, acceptance, or merge is claimed. This software contribution is not counted as robot capability and does not change the v4/v5/v6 scientific verdicts.
 
 ## Reproducibility and evidence
 
-The submission evidence directory contains byte-identical copies of the frozen summaries:
+The submission contains frozen, hash-bound evidence:
 
 | File | SHA-256 |
 |---|---|
+| `submission/evidence/verified-flight-envelope-aggregate.json` | `c7ca6e460e967c3070736d8120bd918a3c489f1e7d62a3ae933ab631af827f58` |
+| `submission/evidence/raw-metrics/training-collector/seed303-metrics.json` | `aaa5e1e4654aec24b907527eb5334338a50f328c679eace8208b87f650e36959` |
+| `submission/evidence/raw-metrics/training-collector/seed304-metrics.json` | `61b70eead81696608a75436db23f59be9f01a25f65d09af9bc81a6d489010b54` |
+| `submission/evidence/raw-metrics/training-collector/seed305-metrics.json` | `24cadca684b1de7f069f4ffb3767502396c1f38031f35e606157fc7874395955` |
+| `submission/evidence/raw-metrics/heldout-three-gate-mission/seed303-metrics.json` | `7d30a032a032b3d757a77afbe8ed60aa97c61e54f557ef2ba242251b14f14238` |
+| `submission/evidence/raw-metrics/heldout-three-gate-mission/seed304-metrics.json` | `c3408cbb720df48690783888e6335b6350c265ad4af8526d72486250aa2204a8` |
+| `submission/evidence/raw-metrics/heldout-three-gate-mission/seed305-metrics.json` | `e546809527d28df7b25fa82ad2d552de170672c871fee6aed132889f38d8d63e` |
+| `submission/evidence/radeon-formal-scaling.json` | `98d9b331907f9968ae65054c6f9d840dc0440eb9209c14e955dc628df736f072` |
 | `submission/evidence/v4-summary.json` | `4ebab98a9b9c3b134548ef646c30aaafbd7d6ddeaa8a0485b667ee8054f80f8b` |
 | `submission/evidence/v5-summary.json` | `d546a620931fc3afb2c074d749e1fe017ba6c4dcdf2d05b570855a913e83b034` |
 | `submission/evidence/v6-checkpoint-30.json` | `905925dedc62a41a8b4c35ace8b1c5a1bd1d97c9cb4d43a5f513f3827cf0a678` |
 | `submission/evidence/v6-audit-receipt.json` | `521738135a3dcc28dc42ecd8b4f01fe5abe925b8353a45577d0b8b5de9e3e8c1` |
 | `submission/evidence/capture-terminal.json` | `923c24124f9af6d53d82a80c9efd72d8e5ada962a4ceb30adf48e232c2c341be` |
-| `submission/evidence/radeon-formal-scaling.json` | `98d9b331907f9968ae65054c6f9d840dc0440eb9209c14e955dc628df736f072` |
-| `scripts/evaluate_frozen_claim_constraints.py` | `33c58e5ecf3c861ff931421c488fbdbb3293f47cbb9edd7164d27f025931abe9` |
-| `tests/test_evaluate_frozen_claim_constraints.py` | `73160247493eb0ce5148c3c5d313f7798d6d08ee1b9bd4ea9504743536d9e49e` |
 | `submission/evidence/frozen-claim-auditor-benchmark.json` | `ccbf38ef7aa36571c3f2433d5f4e9d54b1dd1de7cc2e8f93f2291ccc816f83f7` |
 
-`scripts/build_award_figures.py` verifies the v4/v5/v6/scaling hashes, derives every plotted value from those JSON payloads, and writes deterministic SVG, CSV, and JSON outputs. The static demo foregrounds the three-case gate matrix and the separate Radeon throughput evidence; its animation and archived fault map remain explicitly illustrative.
+Run `python3 scripts/judge_smoke.py` from the submission directory for a standard-library/OpenCV evidence check. The command does not rerun simulation or use the network.
 
-`scripts/render_submission_video.py` produced the primary reviewer artifact, `submission/flightguard-genesis-workflow-demo.mp4`: 1280×720, 10 fps, 2,100 frames, 210.0 seconds, reported codec `FMP4`, no audio, size 18,873,354 bytes, SHA-256 `37924b5e3ef81a122c2ef5a76edb40ed9db0fd38aba2dbb08fb153b8b1fb0ba0`. Its 00:30–01:20 interval is a real Genesis truth-controller visual replay sourced from `submission/genesis-nominal-visual-replay.mp4` (fixed seed 5001, one simulation step per frame, terminal step 476, 24 padded frames, 500 frames, SHA-256 `adc0ea528b611e55dca006d220c30ef935f32448f6b935b7b6c1a33cd9d9fbce`). The segment is simulation-only, visual-only, and metric-ineligible; it demonstrates nominal simulator motion and the review workflow, not fault recovery.
-
-`submission/flightguard-faultfork-demo.mp4` is retained as the frozen-evidence explainer: 1280×720, 10 fps, 2,100 frames, 210.0 seconds, size 19,375,892 bytes, SHA-256 `fc76e7b051c392274ca98627cc2c125727c7661a9545f67875a9593afc592c64`.
+The primary reviewer video is `submission/flightguard-nominal-envelope-demo-v2.mp4`: 2,100 frames, 1280×720, 10 fps, 210.0 seconds, 17,428,715 bytes, SHA-256 `a5f13ea90ed64468299e925721607c2a2e896efc33fc99213f50cb0fa50799fd`. It keeps two sources separate. The embedded clip is the existing fixed-seed 5001 truth-controller nominal visual, explicitly simulation-only and metric-ineligible; it is not a heldout evidence context. Result cards independently summarize the six raw metric files, aggregate JSON, collector evidence, and scaling. Renderer SHA-256: `a0a17d91e15c92f8541da594c7c2ca04b97ce7c5326f61b08436798caace35cd`.
 
 ## Limitations and claim boundary
 
 - Simulation-only; no hardware-in-the-loop or physical-flight validation.
-- One T265 development event; no population-generalization claim.
-- Causal only relative to ROS bag record-time availability, not global causality.
-- No sim-to-real, real-flight repair, safety, certification, or formal-superiority claim.
-- The open, draft, unmerged upstream PR is software-only evidence; it is not robot capability and does not alter the v4/v5/v6 scientific verdicts.
-- Radeon scaling is limited to the fixed r5 nominal deployed pipeline on one GPU; it is not estimator or repair superiority.
-- Frozen-auditor accuracy 1.0 applies only to four immutable synthetic cases; it is not evidence of general accuracy, robot capability, or safety.
-- The primary MP4 is a silent simulation workflow rendering. Its Genesis segment is visual-only and metric-ineligible; it supports no fault-recovery, sim-to-real, safety, real-flight, or upstream claim.
+- Results cover 384 sampled heldout contexts, not a continuous hyper-rectangle or formally certified flight envelope.
+- No sim-to-real, real-flight repair, safety, certification, or population-generalization claim.
+- The three registered method replicas tie exactly; no learned-method superiority claim.
+- Dropout starts at step 999, more than 532 steps after each reported seed mean terminal step. The evidence does not establish dropout recovery or prove every episode ended before dropout.
+- Heldout mission metrics contain no saturation field; only the collector supports a saturation result.
+- Radeon scaling applies to the fixed r5 workload on one GPU; it is not a cross-device benchmark or estimator-superiority result.
+- v4 and v6 are scientific failures; v5 is award-ineligible with zero incremental capability.
+- The four-case claim-auditor accuracy is limited to its immutable synthetic corpus.
+- Video replay is simulation-only, visual-only, and metric-ineligible.
 
-The negative v6 result is a result: under the frozen gate, the observer did not earn deployment beyond the calibrated baseline.
-
+The defensible conclusion is a Radeon-native sampled nominal flight-verification workflow with strong reproducibility and throughput evidence. It is not a physical-flight safety or certified-envelope claim.
