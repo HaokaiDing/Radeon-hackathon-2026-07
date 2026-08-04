@@ -1,459 +1,164 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="FaultFork is a simulation-only, Radeon-native, fail-closed embodied-flight claim auditor."
-    />
-    <title>FaultFork — Radeon-native Claim Auditor</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131820'/%3E%3Cpath d='M17 17h31v8H25v8h18v8H25v14h-8z' fill='%23fff'/%3E%3C/svg%3E"
-    />
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body data-mode="evidence">
-    <header class="topbar">
-      <a class="brand" href="#replay" aria-label="FaultFork home">
-        <span class="brand-mark" aria-hidden="true">F∕F</span>
-        <span>
-          <strong>FaultFork</strong>
-          <small>EMBODIED CLAIM AUDITOR</small>
-        </span>
-      </a>
-      <div class="scope-tags" aria-label="Evidence scope">
-        <span class="tag tag-amber">SIMULATION-ONLY</span>
-        <span class="tag">FAIL-CLOSED · EVIDENCE-FIRST</span>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FlightGuard qualifies quadrotor controllers across matched off-nominal Genesis contexts on one AMD Radeon GPU.">
+  <meta property="og:title" content="FlightGuard Challenge Arena">
+  <meta property="og:description" content="194/384 to 371/384 primary successes, 121/192 to 192/192 retention, zero regressions.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/HaokaiDing/Radeon-hackathon-2026-07/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/submission/figures/challenge-arena-terminal.png">
+  <title>FlightGuard Challenge Arena</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="FlightGuard home">
+      <span class="brand-mark">FG</span>
+      <span><strong>FlightGuard</strong><small>CONTROLLER QUALIFICATION</small></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#arena">Arena</a>
+      <a href="#rubric">Judge map</a>
+      <a href="#radeon">Radeon</a>
+      <a class="nav-cta" href="https://github.com/AMD-DEV-CONTEST/Radeon-hackathon-2026-07/pull/62">Open PR #62</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="pills">
+          <span>SIMULATION-ONLY</span>
+          <span>GENESIS × AMD RADEON</span>
+          <span>TRACK 3</span>
+        </div>
+        <p class="eyebrow">QUALIFY BEFORE HARDWARE</p>
+        <h1>Find the flight failures.<br><em>Keep the evidence.</em></h1>
+        <p class="lede">FlightGuard evaluates two controllers in matched off-nominal worlds, preserves every failure, and produces a judge-checkable qualification report before hardware testing.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#arena">Watch 7-second replay</a>
+          <a class="button secondary" href="https://github.com/AMD-DEV-CONTEST/Radeon-hackathon-2026-07/pull/62">Open submission</a>
+        </div>
       </div>
-    </header>
-
-    <main>
-      <section class="hero" aria-labelledby="hero-title">
-        <div>
-          <p class="eyebrow">GENESIS × AMD RADEON</p>
-          <h1 id="hero-title">Fork the world.<br />Audit the claim.</h1>
+      <div class="hero-score" aria-label="Headline Challenge Arena results">
+        <div class="score-label"><span>PRIMARY ADVERSARIAL</span><span>384 MATCHED PAIRS</span></div>
+        <div class="score-line"><strong>194</strong><span>/384</span><b aria-hidden="true">→</b><strong class="good">371</strong><span>/384</span></div>
+        <div class="delta">+177 successes · +46.1 percentage points</div>
+        <div class="score-grid">
+          <div><span>RETENTION</span><strong>121/192 → 192/192</strong></div>
+          <div><span>REGRESSIONS</span><strong>0</strong></div>
+          <div><span>FAILURE REDUCTION</span><strong>93.16%</strong></div>
+          <div><span>FROZEN GATES</span><strong>14 / 14 PASS</strong></div>
         </div>
-        <div class="hero-copy">
-          <p>
-            A Radeon-native evidence pipeline that freezes inputs, replays the device path,
-            applies preregistered gates, and keeps the result when a candidate fails.
-            Across v4, v5, and v6, <strong>no candidate mechanism claim was established</strong>.
-          </p>
-          <p class="claim-boundary">
-            Simulation-only · single T265 development event · causal only relative to
-            the ROS bag record-time availability proxy. No sim-to-real, safety,
-            certification, real-flight repair, or formal-superiority claim.
-          </p>
-        </div>
-      </section>
-
-      <section class="result-matrix-section" aria-labelledby="result-matrix-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">CURRENT FROZEN EVIDENCE</p>
-            <h2 id="result-matrix-title">Three candidates. Three bounded outcomes.</h2>
-          </div>
-          <div class="verdict-badge" aria-label="No candidate mechanism claim established">
-            <span>CANDIDATE MECHANISM CLAIM</span>
-            <strong>NOT ESTABLISHED</strong>
-          </div>
-        </div>
-        <div class="result-matrix" role="list" aria-label="v4 v5 v6 gate matrix">
-          <article class="result-card result-card-fail" role="listitem">
-            <div class="result-card-head"><span>V4</span><strong>SCIENTIFIC FAIL</strong></div>
-            <h3>Causal IMU repair</h3>
-            <p>Fault success: Patch <b>11/36</b> · ActionOnly <b>0/36</b> · Raw <b>33/36</b> · Cal <b>32/36</b>.</p>
-            <ul>
-              <li>Failure reduction vs ActionOnly: <b>30.56%</b></li>
-              <li>Required reduction: 50%</li>
-              <li>Patch did not beat Raw or Cal</li>
-            </ul>
-          </article>
-          <article class="result-card result-card-neutral" role="listitem">
-            <div class="result-card-head"><span>V5</span><strong>AWARD-INELIGIBLE</strong></div>
-            <h3>Residual-q95 quarantine</h3>
-            <p>Fault success: Patch <b>10/12</b> · ActionOnly <b>0/12</b> · Cal <b>10/12</b>; nominal Patch/Cal <b>12/12</b>.</p>
-            <ul>
-              <li>19 post-onset fields raw-bit exact</li>
-              <li>Patch = Cal operationally</li>
-              <li>Incremental capability: <b>0</b></li>
-            </ul>
-          </article>
-          <article class="result-card result-card-fail" role="listitem">
-            <div class="result-card-head"><span>V6 · CP30</span><strong>SCIENTIFIC FAIL</strong></div>
-            <h3>Frozen 8-state observer</h3>
-            <p>Recurrence, no-op, kill, rank, and sigma passed; <b>0/12</b> lanes were admitted and <b>12/12</b> used exact-Cal fallback.</p>
-            <ul>
-              <li>Split-half: 0/12</li>
-              <li>Δv / rotation RMSE ≤ 0.90×Cal: 0/12 each</li>
-              <li>q95 ≤ Cal: 3/12 each · cp31/32 not audited</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section id="replay" class="replay-section" aria-labelledby="replay-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">01 · TWIN-WORLD REPLAY</p>
-            <h2 id="replay-title">One history. One intervention.</h2>
-          </div>
-          <div class="mode-switch" role="group" aria-label="View mode">
-            <button class="mode-button is-active" type="button" data-mode-button="evidence">
-              Evidence
-            </button>
-            <button class="mode-button" type="button" data-mode-button="explore">
-              Explore
-            </button>
-          </div>
-        </div>
-
-        <div class="mode-notice" id="mode-notice" role="status">
-          <span class="status-dot" aria-hidden="true"></span>
-          <strong>Evidence mode</strong>
-          <span>Frozen onset at step 300. Motion is a schematic, not a raw trajectory.</span>
-        </div>
-
-        <div class="world-grid">
-          <article class="world-card">
-            <div class="world-head">
-              <div>
-                <span class="world-index">A</span>
-                <h3>Matched nominal</h3>
-              </div>
-              <span class="world-status world-status-neutral">REFERENCE</span>
-            </div>
-            <div class="flight-stage" id="nominal-stage">
-              <canvas class="flight-canvas" id="nominal-canvas" aria-hidden="true"></canvas>
-              <div class="gate gate-one" aria-hidden="true"><span></span></div>
-              <div class="gate gate-two" aria-hidden="true"><span></span></div>
-              <div class="drone" id="nominal-drone" aria-label="Schematic nominal drone">
-                <span class="drone-body"></span>
-                <span class="rotor rotor-one"></span>
-                <span class="rotor rotor-two"></span>
-                <span class="rotor rotor-three"></span>
-                <span class="rotor rotor-four"></span>
-              </div>
-              <span class="stage-label">SCHEMATIC VIEW</span>
-            </div>
-            <p class="world-caption">
-              Same pre-onset state, action, and route. Scheduled targets stay inactive.
-            </p>
-          </article>
-
-          <article class="world-card world-card-fault">
-            <div class="world-head">
-              <div>
-                <span class="world-index world-index-fault">B</span>
-                <h3>Scheduled fault</h3>
-              </div>
-              <span class="world-status" id="fault-status">ARMED</span>
-            </div>
-            <div class="flight-stage" id="fault-stage">
-              <canvas class="flight-canvas" id="fault-canvas" aria-hidden="true"></canvas>
-              <div class="gate gate-one" aria-hidden="true"><span></span></div>
-              <div class="gate gate-two" aria-hidden="true"><span></span></div>
-              <div class="fault-wave" id="fault-wave" aria-hidden="true"></div>
-              <div class="drone drone-fault" id="fault-drone" aria-label="Schematic faulted drone">
-                <span class="drone-body"></span>
-                <span class="rotor rotor-one"></span>
-                <span class="rotor rotor-two"></span>
-                <span class="rotor rotor-three"></span>
-                <span class="rotor rotor-four"></span>
-              </div>
-              <span class="stage-label">SCHEMATIC VIEW</span>
-            </div>
-            <p class="world-caption" id="fault-caption">
-              Coincident perception blackout and scheduled fault activate once at step 300.
-            </p>
-          </article>
-        </div>
-
-        <div class="timeline-card">
-          <div class="timeline-readout">
-            <button id="play-button" class="play-button" type="button" aria-label="Play replay">
-              <span aria-hidden="true">▶</span>
-              <span>Play</span>
-            </button>
-            <div>
-              <span>SIM STEP</span>
-              <strong id="step-readout">300</strong>
-              <small id="phase-readout">INTERVENTION ONSET</small>
-            </div>
-            <div class="pairing-readout">
-              <span>PRE-ONSET PAIR Δ</span>
-              <strong>0.0</strong>
-              <small>ALL 6 TRACKED FIELDS</small>
-            </div>
-          </div>
-          <div class="timeline-control">
-            <div class="timeline-labels" aria-hidden="true">
-              <span>matched history</span>
-              <span id="onset-label">fault @ 300</span>
-              <span>response @ 400</span>
-            </div>
-            <input
-              id="step-slider"
-              type="range"
-              min="0"
-              max="400"
-              value="300"
-              step="1"
-              aria-label="Simulation step"
-            />
-            <div class="timeline-track" aria-hidden="true">
-              <span class="timeline-onset" id="timeline-onset"></span>
-            </div>
-          </div>
-
-          <div class="explore-controls" id="explore-controls" aria-hidden="true">
-            <label>
-              <span>Illustrative onset <strong id="explore-onset-value">300</strong></span>
-              <input id="onset-slider" type="range" min="180" max="340" value="300" step="10" disabled />
-            </label>
-            <label>
-              <span>Illustrative severity <strong id="severity-value">1.0×</strong></span>
-              <input
-                id="severity-slider"
-                type="range"
-                min="50"
-                max="150"
-                value="100"
-                step="10"
-                disabled
-              />
-            </label>
-            <p>Explore controls alter only the schematic animation. They never alter evidence.</p>
-          </div>
-        </div>
-
-        <div class="structural-strip" aria-label="Current Radeon capture and checkpoint-30 audit">
-          <div>
-            <span>RADEON CAPTURES</span>
-            <strong>3 / 3</strong>
-          </div>
-          <div>
-            <span>RECURRENCE</span>
-            <strong>PASS</strong>
-          </div>
-          <div>
-            <span>DISABLED NO-OP</span>
-            <strong>PASS</strong>
-          </div>
-          <div>
-            <span>ENABLED KILL</span>
-            <strong>PASS</strong>
-          </div>
-          <div>
-            <span>CP30 ADMITTED</span>
-            <strong>0 / 12</strong>
-          </div>
-        </div>
-      </section>
-
-      <section class="audit-section" aria-labelledby="audit-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">ARCHIVED EXPLORATION · NON-CLAIM</p>
-            <h2 id="audit-title">A retained fault map outside the submission claim.</h2>
-          </div>
-          <div class="verdict-badge" aria-label="Preregistered gate failed">
-            <span>EXPLORATORY LANE</span>
-            <strong>NO CLAIM</strong>
-          </div>
-        </div>
-
-        <div class="audit-grid">
-          <div class="heatmap-panel">
-            <div class="aggregate-row">
-              <div>
-                <span>ARCHIVED ALWAYS-CONTINUE EXPLORATION</span>
-                <strong>53 / 96</strong>
-              </div>
-              <div class="aggregate-bar" aria-label="53 failures out of 96">
-                <span style="width: 55.2083%"></span>
-              </div>
-              <span>55.2% terminal failures</span>
-            </div>
-
-            <div class="heatmap" id="heatmap" aria-label="Terminal failures by fault stratum">
-              <button class="heat-cell is-selected" type="button" data-stratum="12">
-                <span class="cell-id">S12</span>
-                <strong>13</strong>
-                <span>/16</span>
-              </button>
-              <button class="heat-cell" type="button" data-stratum="13">
-                <span class="cell-id">S13</span>
-                <strong>11</strong>
-                <span>/16</span>
-              </button>
-              <button class="heat-cell heat-cell-pass" type="button" data-stratum="14">
-                <span class="cell-id">S14</span>
-                <strong>2</strong>
-                <span>/16</span>
-              </button>
-              <button class="heat-cell heat-cell-low" type="button" data-stratum="15">
-                <span class="cell-id">S15</span>
-                <strong>0</strong>
-                <span>/16</span>
-              </button>
-              <button class="heat-cell" type="button" data-stratum="16">
-                <span class="cell-id">S16</span>
-                <strong>15</strong>
-                <span>/16</span>
-              </button>
-              <button class="heat-cell heat-cell-pass" type="button" data-stratum="17">
-                <span class="cell-id">S17</span>
-                <strong>12</strong>
-                <span>/16</span>
-              </button>
-            </div>
-
-            <div class="heat-legend">
-              <span><i class="legend-low"></i> below range</span>
-              <span><i class="legend-pass"></i> preregistered range: 2–12</span>
-              <span><i class="legend-high"></i> above range</span>
-            </div>
-          </div>
-
-          <aside class="stratum-detail" aria-live="polite">
-            <div class="detail-id"><span id="detail-id">S12</span> / FAULT COMPOSITION</div>
-            <h3 id="detail-name">Thrust × horizontal wind</h3>
-            <p id="detail-description">
-              Thrust scale 0.94–0.98 with horizontal wind 0.3–0.6 m/s².
-            </p>
-            <div class="detail-count">
-              <span>TERMINAL FAILURES</span>
-              <strong id="detail-count">13 / 16</strong>
-              <small id="detail-gate">ABOVE PREREGISTERED RANGE</small>
-            </div>
-            <p class="detail-note">
-              These archived counts are not v4/v5/v6 claim evidence. Selecting a stratum
-              changes the schematic replay direction only as a visual cue.
-            </p>
-          </aside>
-        </div>
-      </section>
-
-      <section class="evidence-section" aria-labelledby="evidence-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">03 · EVIDENCE CONTRACT</p>
-            <h2 id="evidence-title">A failed gate stays failed.</h2>
-          </div>
-        </div>
-
-        <div class="contract-grid">
-          <article class="contract-card evidence-card">
-            <div class="contract-icon" aria-hidden="true">E</div>
-            <h3>Evidence lane</h3>
-            <p>Frozen v4/v5/v6 inputs, preregistered gates, and byte-verified summaries.</p>
-            <ul>
-              <li>v4 scientific FAIL retained</li>
-              <li>v5 tie with Cal marked incremental capability 0</li>
-              <li>v6 cp30 0/12 admission retained</li>
-              <li>cp31/32 audit stopped after the gate failed</li>
-            </ul>
-          </article>
-          <article class="contract-card explore-card">
-            <div class="contract-icon" aria-hidden="true">X</div>
-            <h3>Explore lane</h3>
-            <p>Clearly marked visual hypotheses for discussion and demo rehearsal.</p>
-            <ul>
-              <li>No evidence values are recomputed</li>
-              <li>No explored state enters the certificate</li>
-              <li>No hidden safe-arm outcome is exposed</li>
-              <li>No exploratory view supports a performance claim</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section class="system-section" aria-labelledby="system-title">
-        <div class="radeon-panel">
-          <div class="radeon-glow" aria-hidden="true"></div>
-          <div>
-            <p class="eyebrow">AMD COMPUTE PATH</p>
-            <h2 id="system-title">Radeon is inside the evidence path.</h2>
-            <p>
-              Genesis capture, recurrence, and fixed-pipeline scaling ran through a serial,
-              single-GPU PyTorch ROCm path. Throughput is reported separately from mechanism science.
-            </p>
-          </div>
-          <div class="radeon-metrics">
-            <div>
-              <span>DEVICE</span>
-              <strong>AMD Radeon Graphics</strong>
-            </div>
-            <div>
-              <span>VISIBLE GPU</span>
-              <strong>1 · SERIAL</strong>
-            </div>
-            <div>
-              <span>FIXED WORKLOAD</span>
-              <strong>r5 nominal deployed</strong>
-            </div>
-            <div>
-              <span>MEASURED TRANSITIONS</span>
-              <strong>2,227,200</strong>
-            </div>
-            <div>
-              <span>32 ENV THROUGHPUT</span>
-              <strong>4,632.5826 t/s</strong>
-            </div>
-            <div>
-              <span>512 ENV THROUGHPUT</span>
-              <strong>74,246.4639 t/s</strong>
-            </div>
-            <div>
-              <span>512 / 32 SPEEDUP</span>
-              <strong>16.027013647337444×</strong>
-            </div>
-            <div>
-              <span>MAX GPU / VRAM</span>
-              <strong>86% · 962,785,280 B</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="certificate-panel">
-          <div>
-            <p class="eyebrow">MACHINE-READABLE RECEIPT</p>
-            <h2>Export the gate matrix with its boundary.</h2>
-            <p>
-              The JSON certificate carries the v4/v5/v6 outcomes, separate Radeon throughput,
-              frozen evidence hashes, and explicit exclusions. Explore parameters never enter evidence.
-            </p>
-          </div>
-          <div class="certificate-preview" aria-hidden="true">
-            <span>{</span>
-            <code>"v4": "SCIENTIFIC_FAIL",</code>
-            <code>"v5": "AWARD_INELIGIBLE",</code>
-            <code>"v6_cp30": "SCIENTIFIC_FAIL",</code>
-            <code>"radeon_speedup": 16.027013647337444</code>
-            <span>}</span>
-          </div>
-          <button id="export-button" class="export-button" type="button">
-            <span>Download evidence certificate</span>
-            <span aria-hidden="true">↓ JSON</span>
-          </button>
-          <p id="download-status" class="download-status" aria-live="polite"></p>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <div>
-        <strong>FaultFork</strong>
-        <span>Negative evidence is part of the product.</span>
       </div>
-      <p>
-        Genesis simulation · AMD Radeon · frozen development evidence · explicit claim boundary
-      </p>
-    </footer>
+    </section>
 
-    <script src="./app.js"></script>
-  </body>
+    <section class="proof-strip" aria-label="Evidence summary">
+      <div><span>PREREGISTERED SEEDS</span><strong>+57 · +58 · +62</strong></div>
+      <div><span>APPLIED SATURATION</span><strong>0.0</strong></div>
+      <div><span>RADEON TRANSITIONS</span><strong>2,227,200</strong></div>
+      <div><span>INTRA-DEVICE SCALE</span><strong>16.027×</strong></div>
+    </section>
+
+    <section class="section arena" id="arena">
+      <div class="section-head">
+        <div><p class="eyebrow">01 · PAIRED GENESIS REPLAY</p><h2>Same world. One controller change.</h2></div>
+        <p>Only vertical gains change: <code>kp_z 2.5→8.0</code> and <code>kd_z 2.0→3.6</code>. Initial state, gates, vehicle and environment parameters, plus random streams remain matched.</p>
+      </div>
+      <div class="video-shell">
+        <video controls preload="metadata" poster="https://raw.githubusercontent.com/HaokaiDing/Radeon-hackathon-2026-07/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/submission/figures/challenge-arena-terminal.png">
+          <source src="https://raw.githubusercontent.com/HaokaiDing/Radeon-hackathon-2026-07/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/submission/flightguard-challenge-arena-v1.mp4" type="video/mp4">
+          Your browser cannot play this video. Use the replay link below.
+        </video>
+        <div class="video-caption">
+          <div><span>NOMINAL PD</span><strong>collision · step 167 · 0/3 gates</strong></div>
+          <div><span>ROBUST_Z</span><strong>complete · step 479 · 3/3 gates</strong></div>
+          <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/submission/flightguard-challenge-arena-v1.mp4">Open replay file ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section results">
+      <div class="section-head compact">
+        <div><p class="eyebrow">02 · FROZEN RESULT EXPLORER</p><h2>One headline, two independent lanes.</h2></div>
+        <div class="toggle" role="group" aria-label="Choose result lane">
+          <button class="is-active" type="button" data-lane="primary">Primary</button>
+          <button type="button" data-lane="retention">Retention</button>
+        </div>
+      </div>
+      <div class="result-panel" aria-live="polite">
+        <div class="result-title"><span id="lane-name">PRIMARY ADVERSARIAL</span><strong id="lane-contexts">384 matched pairs</strong></div>
+        <div class="bar-group">
+          <div class="bar-row"><span>Nominal PD</span><div class="bar"><i id="baseline-bar" style="width:50.5%"></i></div><strong id="baseline-value">194/384 · 50.5%</strong></div>
+          <div class="bar-row candidate"><span>robust_z</span><div class="bar"><i id="candidate-bar" style="width:96.6%"></i></div><strong id="candidate-value">371/384 · 96.6%</strong></div>
+        </div>
+        <div class="result-facts">
+          <div><span>ADDED SUCCESSES</span><strong id="added-value">+177</strong></div>
+          <div><span>ABSOLUTE LIFT</span><strong id="lift-value">+46.1 pp</strong></div>
+          <div><span>NOMINAL-ONLY WINS</span><strong id="regression-value">0</strong></div>
+          <div><span>FAILURES</span><strong id="failure-value">190 → 13</strong></div>
+        </div>
+      </div>
+      <p class="method-note">This selector changes presentation only. It does not recompute evidence or expose an exploratory result.</p>
+    </section>
+
+    <section class="section rubric" id="rubric">
+      <div class="section-head">
+        <div><p class="eyebrow">03 · OFFICIAL 100-POINT JUDGE MAP</p><h2>Evidence aligned to every criterion.</h2></div>
+        <p>The cards map submitted evidence to the official rubric. They are not self-awarded scores.</p>
+      </div>
+      <div class="rubric-grid">
+        <article><span>30 POINTS</span><h3>Robot capability</h3><p>Primary 194/384→371/384; retention 121/192→192/192; zero nominal-only wins across matched contexts.</p></article>
+        <article><span>20 POINTS</span><h3>Radeon & ROCm</h3><p>One visible Radeon, 2,227,200 transitions, and 4,632.58→74,246.46 transitions/s from 32→512 environments.</p></article>
+        <article><span>20 POINTS</span><h3>Innovation</h3><p>Paired adversarial controller qualification with preregistered no-op, kill-magnitude, retention, finite-trace and saturation gates.</p></article>
+        <article><span>20 POINTS</span><h3>Application value</h3><p>A pre-hardware qualification workflow for discovering flight-control failures before costly physical testing.</p></article>
+        <article><span>10 POINTS</span><h3>Upstream contribution</h3><p><a href="https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159">Genesis #3159</a> is open and mergeable; all 3 review threads are resolved.</p></article>
+      </div>
+    </section>
+
+    <section class="section radeon" id="radeon">
+      <div class="radeon-copy">
+        <p class="eyebrow">04 · ONE-RADEON EXECUTION</p>
+        <h2>GPU scaling belongs to the evidence path.</h2>
+        <p>The fixed single-GPU workload scales within one Radeon from 32 to 512 environments. Throughput is kept separate from controller science.</p>
+        <a class="text-link" href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/submission/evidence/radeon-formal-scaling.json">Open frozen scaling evidence ↗</a>
+      </div>
+      <div class="radeon-grid">
+        <div><span>VISIBLE GPU</span><strong>exactly 1</strong></div>
+        <div><span>WORKLOAD</span><strong>2,227,200 transitions</strong></div>
+        <div><span>32 ENVS</span><strong>4,632.58 t/s</strong></div>
+        <div><span>512 ENVS</span><strong>74,246.46 t/s</strong></div>
+        <div class="wide"><span>512 / 32 SPEEDUP</span><strong>16.027×</strong></div>
+      </div>
+    </section>
+
+    <section class="section judge">
+      <div class="judge-card">
+        <p class="eyebrow">60-SECOND JUDGE PATH</p>
+        <h2>Watch. Verify. Inspect.</h2>
+        <ol>
+          <li><span>01</span><div><strong>Watch the paired replay</strong><p>See baseline collision and robust_z completion in the same Genesis scene.</p></div></li>
+          <li><span>02</span><div><strong>Run the evidence-only smoke</strong><p><code>python3 scripts/judge_smoke.py</code> checks submitted bytes, aggregates, gates, figures and videos.</p></div></li>
+          <li><span>03</span><div><strong>Follow the frozen sources</strong><p>Every headline links to the immutable submission snapshot.</p></div></li>
+        </ol>
+      </div>
+      <div class="links-card">
+        <h3>Review artifacts</h3>
+        <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/README.md"><span>Reproduction README</span><b>↗</b></a>
+        <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/docs/technical-report.md"><span>Technical report</span><b>↗</b></a>
+        <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8a51eeda5b6d73e1005773e0750f4bd752f0c9ac/submissions/track3-flightguard/submission/flightguard-challenge-arena-workflow-demo-v3.mp4"><span>3.5-minute workflow video</span><b>↗</b></a>
+        <a href="https://github.com/AMD-DEV-CONTEST/Radeon-hackathon-2026-07/pull/62"><span>Competition PR #62</span><b>↗</b></a>
+        <a href="https://github.com/Genesis-Embodied-AI/genesis-world/pull/3159"><span>Genesis upstream PR #3159</span><b>↗</b></a>
+      </div>
+    </section>
+
+    <section class="boundary">
+      <span>CLAIM BOUNDARY</span>
+      <p>FlightGuard is a <strong>simulation-only, sampled-context controller qualification prototype</strong>. It does not claim physical-flight validation, safety or certification, sim-to-real transfer, a continuous flight envelope, learned-method superiority, or SOTA superiority.</p>
+    </section>
+  </main>
+
+  <footer><strong>FlightGuard</strong><span>Genesis simulation · AMD Radeon · matched evidence · explicit boundaries</span><small>© <span id="year">2026</span> Haokai Ding</small></footer>
+  <script src="./app.js"></script>
+</body>
 </html>
