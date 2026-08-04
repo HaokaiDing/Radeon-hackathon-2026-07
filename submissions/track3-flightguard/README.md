@@ -23,7 +23,13 @@ Radeon | 2,227,200 transitions | 16.027013647337444x scaling
 
 The command validates the six nominal-envelope raw metric files, the Challenge Arena raw pairs and summary, mission and collector totals, one-Radeon execution, throughput evidence, retained falsification lineage, and reviewer video assets. It is evidence-only: no GPU, simulator, training, or network access.
 
-## Start here — 7-second Challenge Arena
+## Start here — one-minute evidence tour
+
+[![FlightGuard one-minute evidence tour: paired simulation failure, recovery, hard-course visualization, Radeon scaling, and limits](submission/flightguard-final-narrative-v3-poster.png)](submission/flightguard-final-narrative-v3.mp4)
+
+[`submission/flightguard-final-narrative-v3.mp4`](submission/flightguard-final-narrative-v3.mp4) is the primary judge entry: **60.9 seconds, 1280×720, 60 fps, simulation-only**. It moves from the paired Challenge Arena failure and recovery to the A2RL-derived 13-gate visualization, then Radeon/ROCm scaling and explicit limitations. The Challenge Arena results are the frozen formal evidence; the A2RL-derived course is labeled visual-only and metric-ineligible and does not change the formal 384/192 results. See the [provenance record](submission/evidence/flightguard-final-narrative-v3-provenance.json).
+
+## 7-second Challenge Arena
 
 [![FlightGuard Challenge Arena terminal frame: baseline collision versus robust mission success](submission/figures/challenge-arena-terminal.png)](submission/flightguard-challenge-arena-v1.mp4)
 
@@ -310,6 +316,7 @@ Open `http://127.0.0.1:8000`. The interface is schematic and cannot change the f
 
 | Artifact | SHA-256 | Meaning |
 |---|---|---|
+| `submission/evidence/flightguard-final-narrative-v3-provenance.json` | `ec08c8eedfdf67f9da6fc23d71ce7decb26dfce83a2e1ee00b4d0ff3d08534e8` | provenance and validation for the 60.9-second judge video |
 | `submission/evidence/challenge-arena/challenge-arena-summary.json` | `91b18677fa9fcb5f05acead2aa3fb4324188b44173ea85fda75c67e2dcb129ee` | frozen paired Challenge Arena aggregate; 14/14 gates PASS |
 | `submission/evidence/challenge-arena/challenge-arena-raw-json-v1.tar.gz` | `21647f791444aed708da5e056f17af98258fbc7605bb46acb4a148c0f6a6811b` | deterministic archive of the eight original raw JSON byte streams; 94,002 bytes |
 | `submission/evidence/verified-flight-envelope-aggregate.json` | `c7ca6e460e967c3070736d8120bd918a3c489f1e7d62a3ae933ab631af827f58` | positive aggregate of existing collector and heldout mission metrics |
@@ -383,6 +390,8 @@ FlightGuard does not claim:
 - `submission/evidence/challenge-arena/`: no-op, kill, three-seed primary, retention, and aggregate evidence
 - `submission/figures/challenge-arena.svg`: paired success comparison rebuilt from the frozen summary
 - `submission/figures/challenge-arena-terminal.png`: exact terminal frame from the paired replay
+- `submission/flightguard-final-narrative-v3.mp4`: primary 60.9-second, 60 fps judge evidence tour
+- `submission/flightguard-final-narrative-v3-poster.png`: poster for the one-minute tour
 - `submission/flightguard-challenge-arena-v1.mp4`: 7-second paired Genesis capability demo
 - `submission/figures/`: deterministic evidence views
 - `submission/video-script.md`: 210-second English burned-caption and screen plan
