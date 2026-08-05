@@ -3,11 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5f0">
   <meta name="description" content="FlightGuard qualifies quadrotor controllers across matched off-nominal Genesis contexts on one AMD Radeon GPU.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://haokaiding.github.io/Radeon-hackathon-2026-07/">
   <meta property="og:title" content="FlightGuard Challenge Arena">
   <meta property="og:description" content="194/384 to 371/384 primary successes, 121/192 to 192/192 retention, zero regressions.">
   <meta property="og:image" content="https://raw.githubusercontent.com/HaokaiDing/Radeon-hackathon-2026-07/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/figures/challenge-arena-terminal.png">
+  <meta name="twitter:card" content="summary_large_image">
   <title>FlightGuard Challenge Arena</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -72,7 +77,7 @@
     </section>
 
     <section class="proof-strip" aria-label="Evidence summary">
-      <div><span>PREREGISTERED SEEDS</span><strong>+57 · +58 · +62</strong></div>
+      <div><span>PER-SEED ADDED SUCCESSES</span><strong>+57 · +58 · +62</strong></div>
       <div><span>APPLIED SATURATION</span><strong>0.0</strong></div>
       <div><span>RADEON TRANSITIONS</span><strong>2,227,200</strong></div>
       <div><span>INTRA-DEVICE SCALE</span><strong>16.027×</strong></div>
@@ -111,7 +116,7 @@
           <div><span>FLIGHT TRACE</span><strong>finite · stop fraction 0 · saturation 0 · no out-of-bounds · no strike</strong></div>
           <div><span>CINEMATIC TRACE</span><strong>continuous lookahead · velocity + tangent camera · 864 unique frames</strong></div>
           <div><span>CLAIM BOUNDARY</span><strong>SIMULATION-ONLY · VISUAL-ONLY · METRIC-INELIGIBLE</strong></div>
-          <div><span>EVIDENCE</span><strong><a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/scripts/render_a2rl_cinematic_course_amd.py">Renderer source ↗</a> · <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/evidence/a2rl-course-visual-v3-render.json">Render receipt ↗</a> · <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/evidence/a2rl-course-visual-v3-master-export.json">Master export receipt ↗</a></strong></div>
+          <div><span>EVIDENCE</span><strong><a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/scripts/render_a2rl_cinematic_course_amd.py">Renderer source ↗</a> · <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/evidence/a2rl-course-visual-v3-render.json">Render receipt ↗</a> · <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/evidence/a2rl-course-visual-v3-master-export.json">Master export receipt ↗</a> · <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/evidence/a2rl-course-visual-v3-poster-selection.json">Poster selection receipt ↗</a></strong></div>
         </div>
       </div>
     </section>
@@ -122,7 +127,7 @@
         <p>This separate fixed-seed Genesis replay makes the flight task easier to inspect. It is <strong>SIMULATION-ONLY / VISUAL-ONLY / METRIC-INELIGIBLE</strong> and does not alter the frozen 384/192 results above.</p>
       </div>
       <div class="video-shell">
-        <video controls preload="metadata">
+        <video controls preload="metadata" poster="flightguard-genesis-hard-course-visual-v1-poster.png?v=4ce7bb2257d1">
           <source src="flightguard-genesis-hard-course-visual-v1-web.mp4?v=da1ffea35a8d" type="video/mp4">
           Your browser cannot play this video. Use the evidence links below.
         </video>
@@ -130,6 +135,7 @@
           <div><span>HARD COURSE SHOWCASE</span><strong>5/5 gates · completion step 829</strong></div>
           <div><span>CLAIM BOUNDARY</span><strong>SIMULATION-ONLY · VISUAL-ONLY · METRIC-INELIGIBLE</strong></div>
           <div><span>EVIDENCE</span><strong><a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/flightguard-genesis-hard-course-visual-v1.mp4">Raw 15s replay ↗</a> · <a href="https://github.com/HaokaiDing/Radeon-hackathon-2026-07/blob/8bfb734287b903b03a9d8583e822eb556795d4be/submissions/track3-flightguard/submission/evidence/hard-course-visual-v1.json">Run receipt ↗</a></strong></div>
+          <div><span>EMBEDDED CLIP</span><strong>9.3 s at 20 fps · trimmed after the final gate · full replay is the 15 s raw file</strong></div>
         </div>
       </div>
     </section>
