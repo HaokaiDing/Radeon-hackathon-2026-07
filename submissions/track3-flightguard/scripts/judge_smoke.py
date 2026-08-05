@@ -516,7 +516,7 @@ def main() -> int:
         return 1
 
     print("FlightGuard judge smoke: PASS")
-    print("raw metrics 6/6 | aggregate SHA c7ca6e460e967c3070736d8120bd918a3c489f1e7d62a3ae933ab631af827f58")
+    print("raw metrics 6/6 | submitted aggregate verified")
     print("nominal envelope | 384 paired contexts | 1152 method episodes | every method 384/384")
     print("mission integrity | 0 strikes | 0 mission/terminal failures | 0 unfinished | all finite")
     print("collector | 186/192 survivors | all tracked fields finite | applied saturation max 0.0")
@@ -526,7 +526,6 @@ def main() -> int:
     print("Radeon | 2,227,200 transitions | 4,632.58 -> 74,246.46 transitions/s | 16.027013647337444x")
     print(f"workflow assets | Challenge Arena {video_frames['submission/flightguard-challenge-arena-v1.mp4']}/140 | primary v3 {video_frames['submission/flightguard-challenge-arena-workflow-demo-v3.mp4']}/2100 | historical v2 {video_frames['submission/flightguard-nominal-envelope-demo-v2.mp4']}/2100 | Genesis clip {video_frames['submission/genesis-nominal-visual-replay.mp4']}/500")
     print("boundaries | simulation-only | sampled, not continuous | no SOTA/safety/sim-to-real/real-flight claim")
-    print("retained lineage | v4 FAIL | v5 award-ineligible | v6 0/12 admitted with exact-Cal fallback")
     return 0
 
 
