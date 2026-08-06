@@ -96,9 +96,107 @@ The three registered replicas tie exactly, so this result supports the shared `r
 
 Across 192 training-distribution collector environments, **186/192 survive**, every tracked field is finite, and maximum per-environment applied-action saturation is **0.0**.
 
-## Full one-Radeon rerun
+## Track 3 reproducibility instructions
 
-Full rerun entry: [`scripts/reconstruct_challenge_arena_amd.py`](scripts/reconstruct_challenge_arena_amd.py). The launcher reconstructs the submitted runner/config and supports the serial no-op, kill, three primary-seed, and three retention-seed Genesis jobs. Environment and dependency details are in [`pyproject.toml`](pyproject.toml) and the launcher help.
+Run every command below from `submissions/track3-flightguard`. The submitted campaign used Linux, Python 3.12, Genesis 1.2.3, a ROCm-enabled PyTorch build, and one visible AMD Radeon GPU. Install the matching ROCm/PyTorch stack first; the project install must keep that build in place.
+
+### Prerequisites and install
+
+```bash
+cd submissions/track3-flightguard
+
+# Activate a Python 3.10–3.12 environment that already has ROCm PyTorch.
+python -m pip install -e '.[sim]'
+# Optional; judge_smoke.py uses this for video metadata checks.
+python -m pip install opencv-python-headless
+```
+
+The event-cloud environment used for the submitted evidence is:
+
+```bash
+export FG_PYTHON=/opt/venv/bin/python3.12
+export PYTHONPATH=/workspace/genesis-v1.2.3-src-b:$PWD:$PWD/src
+export PYGLET_HEADLESS=1
+export HIP_VISIBLE_DEVICES=0
+```
+
+For a normal installed Genesis package, set `FG_PYTHON` to that environment's Python and use `PYTHONPATH="$PWD:$PWD/src"`. Keep `HIP_VISIBLE_DEVICES=0`: the campaign is single-Radeon and the jobs below must run serially.
+
+### 1. CPU-only submitted-evidence check
+
+```bash
+python3 scripts/judge_smoke.py
+```
+
+This requires no GPU, simulator run, or network. Expected output begins with `FlightGuard judge smoke: PASS` and the four headline rows shown in the 60-second judge path above.
+
+### 2. Verify the Genesis AMD backend
+
+```bash
+"$FG_PYTHON" scripts/smoke_genesis_amd.py \
+  --num-envs 8 --steps 32 --seed 0 | tee /tmp/flightguard-genesis-smoke.json
+```
+
+The JSON should report the AMD GPU backend/device, `num_envs: 8`, `steps: 32`, `observation_finite: true`, and `isolated_reset: true`. This is a small functional smoke run, not a benchmark.
+
+### 3. Reconstruct the submitted runner without using the GPU
+
+```bash
+"$FG_PYTHON" scripts/reconstruct_challenge_arena_amd.py \
+  --validate-only --work-root /workspace
+```
+
+This creates and removes a temporary worktree under `/workspace`; it does not modify submitted evidence.
+
+### 4. Rerun the complete Challenge Arena on one Radeon
+
+The campaign contains eight fresh, serial jobs: no-op, kill-magnitude, three primary adversarial seeds, and three retention-heldout seeds.
+
+```bash
+REPRO_DIR="/workspace/flightguard-challenge-arena-repro-$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir "$REPRO_DIR"
+
+run_arena () {
+  "$FG_PYTHON" scripts/reconstruct_challenge_arena_amd.py \
+    --work-root /workspace --output "$1" --mode "$2" \
+    --domain-profile "$3" --seed "$4" --pairs "$5" --steps "$6"
+}
+
+run_arena "$REPRO_DIR/noop-seed264617362-recovery-v2.json" \
+  noop adversarial 264617362 8 800
+run_arena "$REPRO_DIR/kill-seed881940697.json" \
+  kill adversarial 881940697 8 800
+
+for seed in 831900462 200501215 144856705; do
+  run_arena "$REPRO_DIR/primary-adversarial-seed$seed.json" \
+    compare adversarial "$seed" 128 1500
+done
+
+for seed in 831900462 200501215 144856705; do
+  run_arena "$REPRO_DIR/retention-heldout-seed$seed.json" \
+    compare heldout "$seed" 64 1500
+done
+
+"$FG_PYTHON" scripts/summarize_challenge_arena.py \
+  --input-dir "$REPRO_DIR" \
+  --output "$REPRO_DIR/challenge-arena-summary.json"
+```
+
+Expected outputs are eight per-job JSON records plus `challenge-arena-summary.json` under the fresh `REPRO_DIR`. A matching summary reports `status: PASS`, primary `194/384 → 371/384`, retention `121/192 → 192/192`, and zero nominal-only regressions. Machine-dependent elapsed time and throughput can differ.
+
+The submitted per-job GPU loops took 4.76–5.77 seconds each (about 42 seconds in total). Allow additional time for first-use Genesis/JIT startup and the temporary reconstruction performed by each command; installation time is separate. Use one ROCm-compatible Radeon with roughly 1 GB or more free VRAM—the submitted fixed scaling workload peaked below 1 GB—and do not run these jobs concurrently.
+
+### 5. Open the reviewer page and videos
+
+```bash
+python3 -m http.server 8000 --directory demo/faultfork
+```
+
+Open `http://127.0.0.1:8000`. The main assets can also be opened directly:
+
+- [`submission/flightguard-final-narrative-v6.mp4`](submission/flightguard-final-narrative-v6.mp4): one-minute judge tour
+- [`submission/flightguard-challenge-arena-v1.mp4`](submission/flightguard-challenge-arena-v1.mp4): 7-second paired measured replay
+- [`submission/flightguard-genesis-a2rl-course-visual-v3-cinematic.mp4`](submission/flightguard-genesis-a2rl-course-visual-v3-cinematic.mp4): 13-gate visual-only Genesis course
 
 ## Upstream contribution
 
