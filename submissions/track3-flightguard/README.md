@@ -107,7 +107,7 @@ cd submissions/track3-flightguard
 
 # Activate a Python 3.10–3.12 environment that already has ROCm PyTorch.
 python -m pip install -e '.[sim]'
-# Optional; judge_smoke.py uses this for video metadata checks.
+# Optional; judge_smoke.py uses this for local video metadata inspection.
 python -m pip install opencv-python-headless
 ```
 
